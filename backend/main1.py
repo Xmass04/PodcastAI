@@ -1,0 +1,5 @@
+print("================================")
+print("      Welcome to PodcastAI      ")
+print("================================")
+print()
+print("Building the future of learning.")
