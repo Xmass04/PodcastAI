@@ -53,3 +53,4 @@ data/podcasts/
 data/quizzes/
 data/summaries/
 data/translations/
+data/*.pdf
