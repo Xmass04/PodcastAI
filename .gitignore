@@ -1,0 +1,55 @@
+# Virtual Environment
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment variables (API keys)
+.env
+
+# VS Code settings
+.vscode/
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+
+# Build folders
+build/
+dist/
+
+# Testing cache
+.pytest_cache/
+
+# Coverage reports
+.coverage
+htmlcov/
+
+# Local database (if we use SQLite)
+*.db
+*.sqlite3
+
+# User uploads (optional - we'll decide later)
+uploads/
+
+# Generated podcasts (optional)
+generated_audio/
+
+# Generated temporary files
+temp/
+# User-uploaded documents and generated study content
+data/uploads/
+data/extracted_text/
+data/podcasts/
+data/quizzes/
+data/summaries/
+data/translations/
