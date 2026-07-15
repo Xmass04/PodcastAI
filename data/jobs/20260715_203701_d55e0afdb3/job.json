@@ -1,0 +1,80 @@
+{
+  "job_id": "20260715_203701_d55e0afdb3",
+  "title": "PodcastAI background-engine test",
+  "status": "completed",
+  "progress": 100,
+  "message": "All requested content is ready",
+  "created_at": "2026-07-15T20:37:01.118993+00:00",
+  "started_at": "2026-07-15T20:37:02.639103+00:00",
+  "finished_at": "2026-07-15T20:37:43.746910+00:00",
+  "current_task_index": null,
+  "current_task_name": null,
+  "completed_tasks": 2,
+  "failed_tasks": 0,
+  "total_tasks": 2,
+  "cancel_requested": false,
+  "worker_pid": 6048,
+  "metadata": {
+    "test_job": true
+  },
+  "tasks": [
+    {
+      "task_id": "task_1",
+      "name": "Document analysis",
+      "script_name": "document_analyzer.py",
+      "status": "completed",
+      "progress": 100,
+      "message": "Document analysis ready",
+      "attempt": 1,
+      "max_attempts": 2,
+      "environment": {},
+      "input_text": null,
+      "started_at": "2026-07-15T20:37:02.641882+00:00",
+      "finished_at": "2026-07-15T20:37:11.735158+00:00",
+      "duration_seconds": 9.091,
+      "return_code": 0,
+      "stdout": "Analysing document type...\n\nAnalysis complete!\n--------------------------------------------------\nTitle: Titanic Summary and Study Guide\nMode: study\nType: Book Summary and Study Guide\nConfidence: 95%\nTopics/chapters: 14\nDifficulty: Easy\nReading time: 45 min\nLearning time: 90 min\nRecommended pack: Study Pack\nAudio style: Tutor Conversation\n\nRecommended outputs:\n- Chapter-by-chapter summary\n- Key themes and takeaways\n- Timeline of events\n- Character and witness guide\n- Critical thinking prompts\n- Quiz and test questions\n- Key quotes list\n- Audio study conversation\n\nWarnings:\n- Several pages contain no selectable text.\n- Some content appears to be promotional or app-related, such as Bookey links and prompts to unlock full text/audio.\n- The document is a secondary summary/study guide rather than the full original book.\n\nSaved to: C:\\Users\\jackb\\OneDrive\\Desktop\\podcastAI\\data\\analysis\\analysis.json",
+      "stderr": "",
+      "error": null,
+      "diagnostic_report": {
+        "status": "success",
+        "retryable": false,
+        "error_type": null,
+        "likely_cause": null,
+        "suggested_fix": null,
+        "source_file": null,
+        "source_function": null,
+        "source_line": null
+      }
+    },
+    {
+      "task_id": "task_2",
+      "name": "Summary",
+      "script_name": "ai_summarizer.py",
+      "status": "completed",
+      "progress": 100,
+      "message": "Summary ready",
+      "attempt": 1,
+      "max_attempts": 2,
+      "environment": {},
+      "input_text": null,
+      "started_at": "2026-07-15T20:37:11.739890+00:00",
+      "finished_at": "2026-07-15T20:37:43.743261+00:00",
+      "duration_seconds": 31.999,
+      "return_code": 0,
+      "stdout": "Generating summary...\nSummary saved to:\ndata\\summaries\\summary.txt",
+      "stderr": "",
+      "error": null,
+      "diagnostic_report": {
+        "status": "success",
+        "retryable": false,
+        "error_type": null,
+        "likely_cause": null,
+        "suggested_fix": null,
+        "source_file": null,
+        "source_function": null,
+        "source_line": null
+      }
+    }
+  ]
+}

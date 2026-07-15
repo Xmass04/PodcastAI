@@ -1,0 +1,28 @@
+{
+  "document_title": "Access to HE Diploma (Medicine) Specification",
+  "document_mode": "work",
+  "document_type": "Qualification Specification / Course Handbook",
+  "confidence": 92,
+  "topics_or_chapters_found": 9,
+  "difficulty": "Medium",
+  "estimated_reading_minutes": 18,
+  "estimated_learning_minutes": 45,
+  "recommended_pack": "Work Brief",
+  "recommended_outputs": [
+    "Executive summary",
+    "Key requirements brief",
+    "Rules of combination summary",
+    "Assessment strategy summary",
+    "Provider action checklist",
+    "Progression routes summary",
+    "Unit structure overview"
+  ],
+  "audio_style": "Professional Briefing",
+  "reason": "The document is a formal qualification specification and provider-facing handbook for the Access to HE Diploma (Medicine), including aims, validation details, assessment strategy advice, rules of combination, units of assessment, and progression routes. Although it contains educational content, its main purpose is professional guidance for providers rather than student revision or textbook learning.",
+  "warnings": [
+    "Some tabular content, especially inclusion and exclusion rules, may be harder to convert into audio clearly.",
+    "The document appears to begin with a sparse cover page and may omit a visible full title on page 1.",
+    "Unit specifications are referenced but not included, so learning outcomes and assessment criteria are incomplete."
+  ],
+  "user_overrode_mode": false
+}

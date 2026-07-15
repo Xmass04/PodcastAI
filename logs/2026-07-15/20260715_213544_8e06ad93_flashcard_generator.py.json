@@ -1,0 +1,27 @@
+{
+  "run_id": "20260715_213544_8e06ad93",
+  "stage": "Flashcards",
+  "script_name": "flashcard_generator.py",
+  "status": "success",
+  "started_at": "2026-07-15T21:35:27.990122+00:00",
+  "finished_at": "2026-07-15T21:35:44.153438+00:00",
+  "duration_seconds": 16.163,
+  "return_code": 0,
+  "attempt": 1,
+  "error_type": null,
+  "error_message": null,
+  "source_file": null,
+  "source_function": null,
+  "source_line": null,
+  "likely_cause": null,
+  "suggested_fix": null,
+  "retryable": false,
+  "stdout": "Generating flashcards...\n\n✅ Flashcards created successfully!\nCreated: 21 cards\nSaved to: C:\\Users\\jackb\\OneDrive\\Desktop\\podcastAI\\data\\flashcards\\flashcards.json",
+  "stderr": "",
+  "traceback_text": "",
+  "metadata": {
+    "job_id": "20260715_213448_d14e5aa6ab",
+    "task_id": "task_3",
+    "background_worker": true
+  }
+}

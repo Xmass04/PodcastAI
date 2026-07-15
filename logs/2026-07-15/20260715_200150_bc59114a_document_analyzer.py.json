@@ -1,0 +1,26 @@
+{
+  "run_id": "20260715_200150_bc59114a",
+  "stage": "Document Analyzer",
+  "script_name": "document_analyzer.py",
+  "status": "success",
+  "started_at": "2026-07-15T20:01:34.011361+00:00",
+  "finished_at": "2026-07-15T20:01:50.034635+00:00",
+  "duration_seconds": 16.023,
+  "return_code": 0,
+  "attempt": 1,
+  "error_type": null,
+  "error_message": null,
+  "source_file": null,
+  "source_function": null,
+  "source_line": null,
+  "likely_cause": null,
+  "suggested_fix": null,
+  "retryable": false,
+  "stdout": "Analysing document type...\n\nAnalysis complete!\n--------------------------------------------------\nTitle: Titanic: Voices of Courage from the Titanic's Heartbreaking Voyage\nMode: study\nType: Book Summary and Study Guide\nConfidence: 92%\nTopics/chapters: 14\nDifficulty: Medium\nReading time: 95 min\nLearning time: 150 min\nRecommended pack: Study Pack\nAudio style: Tutor Conversation\n\nRecommended outputs:\n- Chapter-by-chapter summaries\n- Key themes and historical context\n- Timeline of the Titanic disaster\n- Important people and survivor accounts\n- Critical thinking questions\n- Quiz and test questions\n- Flashcards for revision\n- Key quotes summary\n\nWarnings:\n- Several pages state that no selectable text was found, suggesting missing OCR or image-only content.\n- Some sections indicate that full text or audio requires the Bookey app, so the supplied document may be incomplete.\n- The document appears to be a summary/study companion rather than the full original book.\n\nSaved to: C:\\Users\\jackb\\OneDrive\\Desktop\\podcastAI\\data\\analysis\\analysis.json\n",
+  "stderr": "",
+  "traceback_text": "",
+  "metadata": {
+    "input_supplied": false,
+    "environment_overrides": []
+  }
+}

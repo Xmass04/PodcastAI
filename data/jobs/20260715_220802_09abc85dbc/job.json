@@ -1,0 +1,90 @@
+{
+  "job_id": "20260715_220802_09abc85dbc",
+  "title": "PodcastAI work generation",
+  "status": "completed",
+  "progress": 100,
+  "message": "All requested content is ready",
+  "created_at": "2026-07-15T22:08:02.851323+00:00",
+  "started_at": "2026-07-15T22:08:03.348474+00:00",
+  "finished_at": "2026-07-15T22:08:40.598214+00:00",
+  "current_task_index": null,
+  "current_task_name": null,
+  "completed_tasks": 2,
+  "failed_tasks": 0,
+  "total_tasks": 2,
+  "cancel_requested": false,
+  "worker_pid": 25196,
+  "metadata": {
+    "document_mode": "work",
+    "podcast_length": "Quick",
+    "uploaded_name": "Access-to-HE-Diploma-Medicine-Specification-2024-2025.pdf",
+    "file_hash": "9218499d958722b2bc23f832dc52560b7bf4d6b24fa591a3c1d9497ae9c1f880",
+    "selected_tasks": [
+      "Document analysis",
+      "Summary",
+      "Podcast script"
+    ]
+  },
+  "tasks": [
+    {
+      "task_id": "task_1",
+      "name": "Summary",
+      "script_name": "ai_summarizer.py",
+      "status": "completed",
+      "progress": 100,
+      "message": "Summary ready",
+      "attempt": 1,
+      "max_attempts": 2,
+      "environment": {},
+      "input_text": null,
+      "started_at": "2026-07-15T22:08:03.351622+00:00",
+      "finished_at": "2026-07-15T22:08:25.298909+00:00",
+      "duration_seconds": 21.943,
+      "return_code": 0,
+      "stdout": "Generating summary...\nSummary saved to:\ndata\\summaries\\summary.txt",
+      "stderr": "",
+      "error": null,
+      "diagnostic_report": {
+        "status": "success",
+        "retryable": false,
+        "error_type": null,
+        "likely_cause": null,
+        "suggested_fix": null,
+        "source_file": null,
+        "source_function": null,
+        "source_line": null
+      }
+    },
+    {
+      "task_id": "task_2",
+      "name": "Podcast script",
+      "script_name": "podcast_generator.py",
+      "status": "completed",
+      "progress": 100,
+      "message": "Podcast script ready",
+      "attempt": 1,
+      "max_attempts": 2,
+      "environment": {
+        "PODCASTAI_PODCAST_LENGTH": "Quick"
+      },
+      "input_text": null,
+      "started_at": "2026-07-15T22:08:25.305340+00:00",
+      "finished_at": "2026-07-15T22:08:40.592159+00:00",
+      "duration_seconds": 15.281,
+      "return_code": 0,
+      "stdout": "Generating work audio script from summary...\n\nSUCCESS: Podcast script created!\nMode: work\nSaved to: C:\\Users\\jackb\\OneDrive\\Desktop\\podcastAI\\data\\podcasts\\podcast_script.txt",
+      "stderr": "",
+      "error": null,
+      "diagnostic_report": {
+        "status": "success",
+        "retryable": false,
+        "error_type": null,
+        "likely_cause": null,
+        "suggested_fix": null,
+        "source_file": null,
+        "source_function": null,
+        "source_line": null
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "document_title": "2 B R 0 2 B",
+  "document_mode": "story",
+  "document_type": "Short Story",
+  "confidence": 99,
+  "topics_or_chapters_found": 1,
+  "difficulty": "Medium",
+  "estimated_reading_minutes": 12,
+  "estimated_learning_minutes": 20,
+  "recommended_pack": "Story Pack",
+  "recommended_outputs": [
+    "Narrated story version",
+    "Plot summary",
+    "Character overview",
+    "Theme analysis",
+    "Discussion questions",
+    "Key quotes"
+  ],
+  "audio_style": "Story Narration",
+  "reason": "The document is a complete fictional short story by Kurt Vonnegut, with narrative prose, characters, dialogue, and a clear ending. It is best suited to a story-focused listening experience.",
+  "warnings": [
+    "Page 1 contains no selectable text.",
+    "The document includes death, suicide, euthanasia, and violence."
+  ],
+  "user_overrode_mode": false
+}

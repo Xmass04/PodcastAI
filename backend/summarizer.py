@@ -1,130 +1,60 @@
-from collections import Counter
+import os
 from pathlib import Path
-import re
+
+from dotenv import load_dotenv
+from openai import OpenAI
 
 
-STOP_WORDS = {
-    "the", "and", "for", "that", "with", "this", "from", "into", "their",
-    "there", "they", "have", "has", "had", "was", "were", "are", "is", "be",
-    "been", "being", "of", "to", "in", "on", "at", "by", "as", "an", "a",
-    "or", "but", "if", "then", "than", "it", "its", "we", "you", "your",
-    "can", "will", "may", "must", "should", "would", "could", "not"
-}
+ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
 
 
-def clean_text(text: str) -> str:
-    """Remove page markers, repeated whitespace and table-of-contents dot leaders."""
+def summarize_text(text: str) -> str:
+    """Generate a clear study summary using the OpenAI API."""
 
-    text = re.sub(
-        r"=+\s*PAGE\s+\d+\s*=+",
-        " ",
-        text,
-        flags=re.IGNORECASE,
+    load_dotenv(dotenv_path=ENV_PATH)
+
+    api_key = os.getenv("OPENAI_API_KEY")
+
+    if not api_key:
+        raise ValueError(
+            "OPENAI_API_KEY was not found. Check your .env file."
+        )
+
+    if not text.strip():
+        raise ValueError("The extracted text is empty.")
+
+    client = OpenAI(api_key=api_key)
+
+    response = client.responses.create(
+        model="gpt-5.5",
+        instructions=(
+            "You are an expert educational study assistant. "
+            "Create accurate revision material using only the document "
+            "provided by the user."
+        ),
+        input=(
+            "Summarise the following document clearly.\n\n"
+            "Requirements:\n"
+            "- Begin with a short overview.\n"
+            "- Use clear headings.\n"
+            "- Use bullet points for key information.\n"
+            "- Explain difficult terms simply.\n"
+            "- Keep important dates, figures, rules and requirements.\n"
+            "- Do not invent information.\n"
+            "- Do not include irrelevant table-of-contents text.\n\n"
+            f"DOCUMENT:\n{text}"
+        ),
+        max_output_tokens=1200,
     )
 
-    text = re.sub(r"\.{4,}", " ", text)
-    text = re.sub(r"\s+", " ", text)
+    if not response.output_text:
+        raise RuntimeError("The AI returned an empty summary.")
 
-    return text.strip()
-
-
-def split_into_sentences(text: str) -> list[str]:
-    """Split document text into usable sentences."""
-
-    sentences = re.split(r"(?<=[.!?])\s+", text)
-
-    return [
-        sentence.strip()
-        for sentence in sentences
-        if 40 <= len(sentence.strip()) <= 500
-    ]
-
-
-def get_word_frequencies(sentences: list[str]) -> Counter:
-    """Count useful words across all sentences."""
-
-    words: list[str] = []
-
-    for sentence in sentences:
-        sentence_words = re.findall(r"\b[a-zA-Z]{3,}\b", sentence.lower())
-
-        for word in sentence_words:
-            if word not in STOP_WORDS:
-                words.append(word)
-
-    return Counter(words)
-
-
-def score_sentence(
-    sentence: str,
-    word_frequencies: Counter,
-) -> float:
-    """Score a sentence based on important words it contains."""
-
-    words = re.findall(r"\b[a-zA-Z]{3,}\b", sentence.lower())
-
-    if not words:
-        return 0.0
-
-    score = sum(word_frequencies[word] for word in words)
-    return score / len(words)
-
-
-def create_summary(text: str, sentence_limit: int = 8) -> str:
-    """Create an extractive summary from the most important sentences."""
-
-    cleaned_text = clean_text(text)
-    sentences = split_into_sentences(cleaned_text)
-
-    if not sentences:
-        return "No suitable text was found for summarisation."
-
-    word_frequencies = get_word_frequencies(sentences)
-
-    scored_sentences = [
-        (score_sentence(sentence, word_frequencies), index, sentence)
-        for index, sentence in enumerate(sentences)
-    ]
-
-    top_sentences = sorted(
-        scored_sentences,
-        key=lambda item: item[0],
-        reverse=True,
-    )[:sentence_limit]
-
-    top_sentences.sort(key=lambda item: item[1])
-
-    return "\n\n".join(
-        f"• {sentence}"
-        for _, _, sentence in top_sentences
-    )
-
-
-def main() -> None:
-    input_path = Path("data/extracted_text/output.txt")
-    output_path = Path("data/summaries/summary.txt")
-
-    if not input_path.exists():
-        print("❌ Extracted text was not found.")
-        print("Run the PDF reader first.")
-        return
-
-    extracted_text = input_path.read_text(encoding="utf-8")
-
-    if not extracted_text.strip():
-        print("❌ The extracted text file is empty.")
-        return
-
-    summary = create_summary(extracted_text)
-
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(summary, encoding="utf-8")
-
-    print("\n✅ Smarter summary created successfully!")
-    print(f"Saved to: {output_path}")
+    return response.output_text
 
 
 if __name__ == "__main__":
-    main()
-    
-    
+    print(
+        "This file provides the summarize_text() function.\n"
+        "Run backend/ai_summarizer.py to summarise the extracted PDF."
+    )

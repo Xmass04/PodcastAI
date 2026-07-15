@@ -1,0 +1,29 @@
+{
+  "document_title": "Titanic: Voices of Courage from the Titanic's Heartbreaking Voyage",
+  "document_mode": "study",
+  "document_type": "Book Summary and Study Guide",
+  "confidence": 92,
+  "topics_or_chapters_found": 14,
+  "difficulty": "Medium",
+  "estimated_reading_minutes": 95,
+  "estimated_learning_minutes": 150,
+  "recommended_pack": "Study Pack",
+  "recommended_outputs": [
+    "Chapter-by-chapter summaries",
+    "Key themes and historical context",
+    "Timeline of the Titanic disaster",
+    "Important people and survivor accounts",
+    "Critical thinking questions",
+    "Quiz and test questions",
+    "Flashcards for revision",
+    "Key quotes summary"
+  ],
+  "audio_style": "Tutor Conversation",
+  "reason": "The document is structured as an educational study guide for Deborah Hopkinson's Titanic, with chapter summaries, examples, critical thinking sections, Q&A, quizzes, and key quotes. Its purpose is best suited to learning and revision rather than simple narration.",
+  "warnings": [
+    "Several pages state that no selectable text was found, suggesting missing OCR or image-only content.",
+    "Some sections indicate that full text or audio requires the Bookey app, so the supplied document may be incomplete.",
+    "The document appears to be a summary/study companion rather than the full original book."
+  ],
+  "user_overrode_mode": false
+}

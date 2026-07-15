@@ -1,0 +1,26 @@
+{
+  "run_id": "20260715_220750_ad7245e6",
+  "stage": "Document Analyzer",
+  "script_name": "document_analyzer.py",
+  "status": "success",
+  "started_at": "2026-07-15T22:07:41.122545+00:00",
+  "finished_at": "2026-07-15T22:07:50.591604+00:00",
+  "duration_seconds": 9.469,
+  "return_code": 0,
+  "attempt": 1,
+  "error_type": null,
+  "error_message": null,
+  "source_file": null,
+  "source_function": null,
+  "source_line": null,
+  "likely_cause": null,
+  "suggested_fix": null,
+  "retryable": false,
+  "stdout": "Analysing document type...\n\nAnalysis complete!\n--------------------------------------------------\nTitle: Access to HE Diploma (Medicine) Specification\nMode: work\nType: Qualification Specification / Course Handbook\nConfidence: 92%\nTopics/chapters: 9\nDifficulty: Medium\nReading time: 18 min\nLearning time: 45 min\nRecommended pack: Work Brief\nAudio style: Professional Briefing\n\nRecommended outputs:\n- Executive summary\n- Key requirements brief\n- Rules of combination summary\n- Assessment strategy summary\n- Provider action checklist\n- Progression routes summary\n- Unit structure overview\n\nWarnings:\n- Some tabular content, especially inclusion and exclusion rules, may be harder to convert into audio clearly.\n- The document appears to begin with a sparse cover page and may omit a visible full title on page 1.\n- Unit specifications are referenced but not included, so learning outcomes and assessment criteria are incomplete.\n\nSaved to: C:\\Users\\jackb\\OneDrive\\Desktop\\podcastAI\\data\\analysis\\analysis.json\n",
+  "stderr": "",
+  "traceback_text": "",
+  "metadata": {
+    "input_supplied": false,
+    "environment_overrides": []
+  }
+}

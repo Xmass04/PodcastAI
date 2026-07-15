@@ -1,11 +1,46 @@
 from __future__ import annotations
 
+import json
+import os
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
+from typing import Any
 
 import streamlit as st
+
+
+BACKEND_IMPORT_FOLDER = Path(__file__).resolve().parent.parent / "backend"
+
+if str(BACKEND_IMPORT_FOLDER) not in sys.path:
+    sys.path.insert(0, str(BACKEND_IMPORT_FOLDER))
+
+from diagnostics import (
+    load_latest_report,
+    record_python_exception,
+    record_subprocess_result,
+    utc_now,
+    wait_before_retry,
+)
+
+
+from cache_manager import (
+    build_cache_key,
+    cache_exists,
+    calculate_file_hash,
+    restore_cache,
+    save_cache,
+)
+
+
+from job_manager import (
+    create_and_start_job,
+    is_finished,
+    read_job,
+    request_cancel,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -22,9 +57,7 @@ NOTES_PATH = DATA_FOLDER / "summaries" / "study_notes.txt"
 FLASHCARDS_PATH = DATA_FOLDER / "flashcards" / "flashcards.json"
 QUIZ_PATH = DATA_FOLDER / "quizzes" / "quiz.json"
 PODCAST_SCRIPT_PATH = DATA_FOLDER / "podcasts" / "podcast_script.txt"
-PODCAST_AUDIO_PATH = (
-    DATA_FOLDER / "podcasts" / "audio" / "podcast_episode.wav"
-)
+PODCAST_AUDIO_PATH = DATA_FOLDER / "podcasts" / "audio" / "podcast_episode.wav"
 
 TASKS = {
     "Document analysis": "document_analyzer.py",
@@ -34,13 +67,40 @@ TASKS = {
     "Quiz": "quiz_generator.py",
     "Podcast script": "podcast_generator.py",
     "Podcast audio": "podcast_audio.py",
+    "Quick Pack resources": "quick_pack_parallel.py",
+}
+
+TASK_ORDER = list(TASKS.keys())
+
+MODE_LABELS = {
+    "study": "Study Material",
+    "story": "Story or Novel",
+    "work": "Work Document",
+    "research": "Research Paper",
+    "general": "General Document",
+}
+
+MODE_PACKS = {
+    "study": "Study Pack",
+    "story": "Story Pack",
+    "work": "Work Brief",
+    "research": "Research Pack",
+    "general": "General Summary",
+}
+
+MODE_AUDIO_STYLES = {
+    "study": "Tutor Conversation",
+    "story": "Story Narration",
+    "work": "Professional Briefing",
+    "research": "Research Discussion",
+    "general": "General Explanation",
 }
 
 
 def configure_page() -> None:
     st.set_page_config(
         page_title="PodcastAI",
-        page_icon="🎓",
+        page_icon="🎧",
         layout="wide",
         initial_sidebar_state="collapsed",
     )
@@ -53,49 +113,33 @@ def configure_page() -> None:
             padding-top: 2rem;
             padding-bottom: 4rem;
         }
-
-        h1, h2, h3 {
-            letter-spacing: -0.02em;
-        }
-
         .hero {
             text-align: center;
-            padding: 2.2rem 1rem 1.5rem;
+            padding: 2rem 1rem 1.25rem;
         }
-
         .hero-title {
             font-size: 3rem;
-            font-weight: 750;
-            margin-bottom: 0.4rem;
+            font-weight: 760;
+            margin-bottom: 0.35rem;
         }
-
         .hero-text {
             font-size: 1.15rem;
-            color: #5b6472;
-            margin-bottom: 1.5rem;
+            color: #9aa4b2;
         }
-
         .info-card {
-            border: 1px solid rgba(128, 128, 128, 0.22);
+            border: 1px solid rgba(128, 128, 128, 0.25);
             border-radius: 16px;
             padding: 1rem 1.2rem;
             margin: 0.75rem 0;
         }
-
-        .small-note {
-            color: #697386;
-            font-size: 0.9rem;
-        }
-
-        div[data-testid="stFileUploader"] {
-            border-radius: 16px;
-        }
-
         div.stButton > button {
             width: 100%;
             min-height: 3rem;
             border-radius: 12px;
             font-weight: 650;
+        }
+        div[data-testid="stExpander"] {
+            border-radius: 12px;
         }
         </style>
         """,
@@ -108,6 +152,16 @@ def initialise_state() -> None:
         "material_ready": False,
         "uploaded_name": None,
         "generation_complete": False,
+        "detected_mode": "study",
+        "selected_mode": "study",
+        "developer_mode": False,
+        "current_file_hash": None,
+        "current_cache_key": None,
+        "cache_loaded": False,
+        "active_job_id": None,
+        "active_job_length": "Standard",
+        "active_job_selected_tasks": [],
+        "active_job_cache_saved": False,
     }
 
     for key, value in defaults.items():
@@ -118,53 +172,214 @@ def initialise_state() -> None:
 def run_backend_script(
     script_name: str,
     input_text: str | None = None,
+    extra_environment: dict[str, str] | None = None,
+    stage_name: str | None = None,
+    max_attempts: int = 2,
 ) -> tuple[bool, str]:
+    """
+    Run one backend script with diagnostics and safe recovery.
+
+    Retryable failures such as temporary timeouts and rate limits are
+    retried once. Source code is never changed automatically.
+    """
+
     script_path = BACKEND_FOLDER / script_name
+    stage = stage_name or script_path.stem.replace("_", " ").title()
 
     if not script_path.exists():
-        return False, f"Missing backend file: {script_path}"
+        message = f"Missing backend file: {script_path}"
 
-    try:
-        result = subprocess.run(
-            [sys.executable, str(script_path)],
-            cwd=PROJECT_ROOT,
-            input=input_text,
-            text=True,
-            capture_output=True,
-            check=False,
+        started_at = utc_now()
+
+        report = record_python_exception(
+            stage=stage,
+            script_name=script_name,
+            started_at=started_at,
+            error=FileNotFoundError(message),
         )
 
-    except OSError as error:
-        return False, str(error)
+        return (
+            False,
+            (
+                f"{message}\n\n"
+                f"Suggested fix: {report.suggested_fix or 'Check the file path.'}"
+            ),
+        )
 
-    combined_output = "\n".join(
-        part for part in (result.stdout, result.stderr) if part
-    )
+    environment = os.environ.copy()
+    environment["PYTHONIOENCODING"] = "utf-8"
+    environment["PYTHONUTF8"] = "1"
 
-    return result.returncode == 0, combined_output.strip()
+    if extra_environment:
+        environment.update(extra_environment)
+
+    final_output = ""
+
+    for attempt in range(1, max_attempts + 1):
+        started_at = utc_now()
+
+        try:
+            result = subprocess.run(
+                [sys.executable, str(script_path)],
+                cwd=PROJECT_ROOT,
+                input=input_text,
+                text=True,
+                capture_output=True,
+                encoding="utf-8",
+                errors="replace",
+                env=environment,
+                check=False,
+            )
+
+        except OSError as error:
+            report = record_python_exception(
+                stage=stage,
+                script_name=script_name,
+                started_at=started_at,
+                error=error,
+                attempt=attempt,
+            )
+
+            final_output = (
+                f"{error}\n\n"
+                f"Likely cause: {report.likely_cause}\n"
+                f"Suggested fix: {report.suggested_fix}"
+            )
+
+            if report.retryable and attempt < max_attempts:
+                wait_before_retry(attempt)
+                continue
+
+            return False, final_output
+
+        finished_at = utc_now()
+
+        report = record_subprocess_result(
+            stage=stage,
+            script_name=script_name,
+            started_at=started_at,
+            finished_at=finished_at,
+            return_code=result.returncode,
+            stdout=result.stdout or "",
+            stderr=result.stderr or "",
+            attempt=attempt,
+            metadata={
+                "input_supplied": input_text is not None,
+                "environment_overrides": sorted(
+                    (extra_environment or {}).keys()
+                ),
+            },
+        )
+
+        output = "\n".join(
+            part
+            for part in (result.stdout, result.stderr)
+            if part
+        ).strip()
+
+        if report.status == "success":
+            return True, output
+
+        location_parts = []
+
+        if report.source_file:
+            location_parts.append(
+                f"File: {report.source_file}"
+            )
+
+        if report.source_function:
+            location_parts.append(
+                f"Function: {report.source_function}"
+            )
+
+        if report.source_line:
+            location_parts.append(
+                f"Line: {report.source_line}"
+            )
+
+        diagnostic_summary = [
+            output,
+            "",
+            f"Diagnostic type: {report.error_type}",
+            f"Likely cause: {report.likely_cause}",
+            f"Suggested fix: {report.suggested_fix}",
+        ]
+
+        if location_parts:
+            diagnostic_summary.append(
+                "Location: " + " | ".join(location_parts)
+            )
+
+        final_output = "\n".join(
+            item
+            for item in diagnostic_summary
+            if item is not None
+        ).strip()
+
+        if report.retryable and attempt < max_attempts:
+            wait_before_retry(attempt)
+            continue
+
+        return False, final_output
+
+    return False, final_output or "The backend task failed."
 
 
 def clear_folder(folder: Path) -> None:
     folder.mkdir(parents=True, exist_ok=True)
 
     for item in folder.iterdir():
-        if item.is_file() or item.is_symlink():
-            item.unlink()
-        elif item.is_dir():
-            shutil.rmtree(item)
+        try:
+            if item.is_file() or item.is_symlink():
+                item.unlink()
+            elif item.is_dir():
+                shutil.rmtree(item)
+        except PermissionError:
+            continue
 
 
-def save_uploaded_file(uploaded_file) -> Path:
+def clear_previous_project_data() -> None:
+    folders = [
+        IMAGE_FOLDER,
+        DATA_FOLDER / "extracted_text",
+        DATA_FOLDER / "analysis",
+        DATA_FOLDER / "summaries",
+        DATA_FOLDER / "flashcards",
+        DATA_FOLDER / "quizzes",
+        DATA_FOLDER / "podcasts",
+    ]
+
+    for folder in folders:
+        clear_folder(folder)
+
+    st.session_state.material_ready = False
+    st.session_state.generation_complete = False
+    st.session_state.detected_mode = "study"
+    st.session_state.selected_mode = "study"
+    st.session_state.current_cache_key = None
+    st.session_state.cache_loaded = False
+    st.session_state.active_job_id = None
+    st.session_state.active_job_selected_tasks = []
+    st.session_state.active_job_cache_saved = False
+
+
+def save_uploaded_file(uploaded_file: Any) -> Path:
     UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
 
     safe_name = Path(uploaded_file.name).name
     destination = UPLOAD_FOLDER / safe_name
     destination.write_bytes(uploaded_file.getbuffer())
 
+    st.session_state.current_file_hash = calculate_file_hash(
+        destination
+    )
+
     return destination
 
 
-def extract_uploaded_material(uploaded_file) -> tuple[bool, str]:
+def extract_uploaded_material(uploaded_file: Any) -> tuple[bool, str]:
+    clear_previous_project_data()
+
     uploaded_path = save_uploaded_file(uploaded_file)
     extension = uploaded_path.suffix.lower()
 
@@ -175,75 +390,12 @@ def extract_uploaded_material(uploaded_file) -> tuple[bool, str]:
         )
 
     if extension in {".jpg", ".jpeg", ".png", ".webp"}:
-        clear_folder(IMAGE_FOLDER)
-
-        image_destination = IMAGE_FOLDER / uploaded_path.name
-        shutil.copy2(uploaded_path, image_destination)
-
+        IMAGE_FOLDER.mkdir(parents=True, exist_ok=True)
+        destination = IMAGE_FOLDER / uploaded_path.name
+        shutil.copy2(uploaded_path, destination)
         return run_backend_script("image_reader.py")
 
     return False, "Unsupported file type."
-
-
-def generate_tasks(
-    selected_tasks: list[str],
-) -> dict[str, tuple[bool, str]]:
-    results: dict[str, tuple[bool, str]] = {}
-
-    progress = st.progress(
-        0,
-        text="Preparing your content...",
-    )
-
-    with st.status(
-        "Creating your PodcastAI pack...",
-        expanded=True,
-    ) as status:
-        total = len(selected_tasks)
-
-        for index, task_name in enumerate(
-            selected_tasks,
-            start=1,
-        ):
-            st.write(f"Creating **{task_name}**...")
-
-            script_name = TASKS[task_name]
-            success, output = run_backend_script(script_name)
-            results[task_name] = (success, output)
-
-            if success:
-                st.write(f"✅ {task_name} ready")
-            else:
-                st.write(f"⚠️ {task_name} could not be completed")
-
-            percentage = int((index / total) * 100)
-
-            progress.progress(
-                percentage,
-                text=f"{task_name}: {'ready' if success else 'failed'}",
-            )
-
-        successful = sum(
-            1 for success, _ in results.values() if success
-        )
-
-        if successful == total:
-            status.update(
-                label="Your content is ready!",
-                state="complete",
-                expanded=False,
-            )
-        else:
-            status.update(
-                label=(
-                    f"Finished with {successful}/{total} "
-                    "items successfully created"
-                ),
-                state="complete",
-                expanded=True,
-            )
-
-    return results
 
 
 def read_text_file(path: Path) -> str | None:
@@ -258,13 +410,353 @@ def read_text_file(path: Path) -> str | None:
     return content or None
 
 
-def display_text_result(
-    title: str,
-    path: Path,
-    download_name: str,
-) -> None:
-    content = read_text_file(path)
+def read_json_file(path: Path) -> dict[str, Any] | None:
+    if not path.exists():
+        return None
 
+    try:
+        return json.loads(
+            path.read_text(
+                encoding="utf-8",
+                errors="replace",
+            )
+        )
+    except (json.JSONDecodeError, OSError):
+        return None
+
+
+def save_analysis(analysis: dict[str, Any]) -> None:
+    ANALYSIS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    ANALYSIS_PATH.write_text(
+        json.dumps(analysis, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+
+
+def apply_mode_override(selected_mode: str) -> None:
+    analysis = read_json_file(ANALYSIS_PATH) or {}
+
+    analysis["document_mode"] = selected_mode
+    analysis["recommended_pack"] = MODE_PACKS[selected_mode]
+    analysis["audio_style"] = MODE_AUDIO_STYLES[selected_mode]
+    analysis["user_overrode_mode"] = (
+        selected_mode != st.session_state.detected_mode
+    )
+
+    save_analysis(analysis)
+
+
+def analyse_current_material() -> tuple[bool, str]:
+    success, output = run_backend_script("document_analyzer.py")
+
+    if not success:
+        return success, output
+
+    analysis = read_json_file(ANALYSIS_PATH)
+    if not analysis:
+        return False, "analysis.json was not created."
+
+    detected_mode = str(
+        analysis.get("document_mode", "study")
+    ).lower()
+
+    if detected_mode not in MODE_LABELS:
+        detected_mode = "general"
+
+    st.session_state.detected_mode = detected_mode
+    st.session_state.selected_mode = detected_mode
+
+    return True, output
+
+
+def current_mode() -> str:
+    mode = st.session_state.get("selected_mode", "study")
+    return mode if mode in MODE_LABELS else "general"
+
+
+def prepare_tasks(selected_tasks: list[str]) -> list[str]:
+    requested = set(selected_tasks)
+
+    if "Podcast audio" in requested:
+        requested.discard("Podcast script")
+
+    return [task for task in TASK_ORDER if task in requested]
+
+
+def generate_podcast_audio_task(
+    mode: str,
+    podcast_length: str,
+) -> tuple[bool, str]:
+    outputs: list[str] = []
+
+    if mode == "study":
+        success, output = run_backend_script("study_notes.py")
+        outputs.append(output)
+
+        if not success or not read_text_file(NOTES_PATH):
+            return False, f"Study-note generation failed.\n\n{output}"
+
+    elif mode in {"work", "research", "general"}:
+        success, output = run_backend_script("ai_summarizer.py")
+        outputs.append(output)
+
+        if not success or not read_text_file(SUMMARY_PATH):
+            return False, f"Summary generation failed.\n\n{output}"
+
+    script_success, script_output = run_backend_script(
+        "podcast_generator.py",
+        extra_environment={
+            "PODCASTAI_PODCAST_LENGTH": podcast_length,
+        },
+        stage_name="Podcast Script",
+    )
+    outputs.append(script_output)
+
+    if not script_success or not read_text_file(PODCAST_SCRIPT_PATH):
+        return False, f"Podcast script generation failed.\n\n{script_output}"
+
+    audio_success, audio_output = run_backend_script("podcast_audio.py")
+    outputs.append(audio_output)
+
+    if not audio_success or not PODCAST_AUDIO_PATH.exists():
+        return False, f"Podcast audio generation failed.\n\n{audio_output}"
+
+    return True, "\n\n".join(output for output in outputs if output)
+
+
+def show_live_result(task_name: str, container: Any) -> None:
+    with container:
+        if task_name == "Document analysis":
+            st.success("Document analysis ready.")
+
+        elif task_name == "Summary":
+            content = read_text_file(SUMMARY_PATH)
+            st.success("Summary ready — you can start reading now.")
+
+            if content:
+                with st.expander("Read summary now", expanded=True):
+                    st.markdown(content)
+
+        elif task_name == "Study notes":
+            content = read_text_file(NOTES_PATH)
+            st.success("Study notes ready.")
+
+            if content:
+                with st.expander("Read study notes now"):
+                    st.markdown(content)
+
+        elif task_name == "Flashcards":
+            data = read_json_file(FLASHCARDS_PATH) or {}
+            cards = data.get("flashcards", [])
+            st.success(f"Flashcards ready ({len(cards)} cards).")
+
+            for index, card in enumerate(cards[:5], start=1):
+                question = card.get(
+                    "question",
+                    "Question unavailable",
+                )
+                answer = card.get(
+                    "answer",
+                    "Answer unavailable",
+                )
+
+                with st.expander(
+                    f"Quick card {index}: {question}"
+                ):
+                    st.write(answer)
+
+            if len(cards) > 5:
+                st.caption(
+                    "Open the complete Flashcards tab for all cards."
+                )
+
+        elif task_name == "Quiz":
+            data = read_json_file(QUIZ_PATH) or {}
+            multiple_choice = data.get("multiple_choice", [])
+            true_false = data.get("true_false", [])
+            short_answer = data.get("short_answer", [])
+            total = (
+                len(multiple_choice)
+                + len(true_false)
+                + len(short_answer)
+            )
+            st.success(f"Quiz ready ({total} questions).")
+
+            preview_questions: list[str] = []
+
+            preview_questions.extend(
+                str(item.get("question", ""))
+                for item in multiple_choice[:3]
+            )
+            preview_questions.extend(
+                str(item.get("statement", ""))
+                for item in true_false[:2]
+            )
+            preview_questions.extend(
+                str(item.get("question", ""))
+                for item in short_answer[:2]
+            )
+
+            for index, question in enumerate(
+                [q for q in preview_questions if q][:5],
+                start=1,
+            ):
+                st.write(f"{index}. {question}")
+
+            if total:
+                st.caption(
+                    "Open the complete Quiz tab to answer and submit it."
+                )
+
+        elif task_name == "Podcast script":
+            script = read_text_file(PODCAST_SCRIPT_PATH)
+            st.success("Audio script ready.")
+
+            if script:
+                with st.expander("Preview the script"):
+                    st.text(script[:5000])
+
+        elif task_name == "Podcast audio":
+            if PODCAST_AUDIO_PATH.exists():
+                st.success("Audio ready — press play.")
+                st.audio(
+                    PODCAST_AUDIO_PATH.read_bytes(),
+                    format="audio/wav",
+                )
+
+
+def generate_tasks(
+    selected_tasks: list[str],
+    podcast_length: str,
+) -> dict[str, tuple[bool, str]]:
+    mode = current_mode()
+    ordered_tasks = prepare_tasks(selected_tasks)
+    results: dict[str, tuple[bool, str]] = {}
+
+    st.markdown("## Live results")
+    st.caption(
+        "Completed resources appear while PodcastAI continues working."
+    )
+
+    containers = {task: st.container() for task in TASK_ORDER}
+    progress = st.progress(0, text="Preparing...")
+
+    with st.status("Building your content...", expanded=True) as status:
+        total = len(ordered_tasks)
+
+        for index, task_name in enumerate(ordered_tasks, start=1):
+            st.write(f"Creating **{task_name}**...")
+
+            if task_name == "Podcast audio":
+                st.write("Preparing the required source, script and audio...")
+                success, output = generate_podcast_audio_task(
+                    mode,
+                    podcast_length,
+                )
+
+                if success:
+                    show_live_result(
+                        "Podcast script",
+                        containers["Podcast script"],
+                    )
+            else:
+                if task_name == "Podcast script":
+                    success, output = run_backend_script(
+                        TASKS[task_name],
+                        extra_environment={
+                            "PODCASTAI_PODCAST_LENGTH": podcast_length,
+                        },
+                        stage_name="Podcast Script",
+                    )
+                else:
+                    success, output = run_backend_script(
+                        TASKS[task_name],
+                        stage_name=task_name,
+                    )
+
+            results[task_name] = (success, output)
+
+            if success:
+                st.write(f"✅ {task_name} ready")
+                show_live_result(task_name, containers[task_name])
+            else:
+                st.write(f"⚠️ {task_name} failed")
+
+                with containers[task_name]:
+                    st.error(f"{task_name} could not be completed.")
+
+                    if output:
+                        with st.expander("Technical details"):
+                            st.code(output)
+
+            progress.progress(
+                int(index / total * 100),
+                text=f"{task_name}: {'ready' if success else 'failed'}",
+            )
+
+        successful = sum(
+            1 for success, _ in results.values() if success
+        )
+
+        if successful == total:
+            status.update(
+                label="Your requested content is ready!",
+                state="complete",
+                expanded=False,
+            )
+        else:
+            status.update(
+                label=f"Finished with {successful}/{total} items created",
+                state="complete",
+                expanded=True,
+            )
+
+    return results
+
+
+def display_analysis_card() -> None:
+    analysis = read_json_file(ANALYSIS_PATH)
+    if not analysis:
+        return
+
+    detected_mode = st.session_state.detected_mode
+    confidence = analysis.get("confidence", "Unknown")
+    document_type = analysis.get("document_type", "Unknown")
+    title = analysis.get("document_title", "Uploaded document")
+
+    st.markdown("## Document detected")
+
+    first, second, third = st.columns(3)
+    first.metric("Mode", MODE_LABELS[detected_mode])
+    second.metric("Document type", document_type)
+    third.metric("Confidence", f"{confidence}%")
+
+    st.caption(title)
+
+    selected_mode = st.selectbox(
+        "Use this document as",
+        options=list(MODE_LABELS.keys()),
+        format_func=lambda value: MODE_LABELS[value],
+        index=list(MODE_LABELS.keys()).index(
+            st.session_state.selected_mode
+        ),
+        help="Change this when PodcastAI detects the wrong type.",
+    )
+
+    if selected_mode != st.session_state.selected_mode:
+        st.session_state.selected_mode = selected_mode
+        apply_mode_override(selected_mode)
+        st.success(f"Document mode updated to {MODE_LABELS[selected_mode]}.")
+
+    mode = current_mode()
+    st.info(
+        f"Recommended: {MODE_PACKS[mode]} • "
+        f"Audio style: {MODE_AUDIO_STYLES[mode]}"
+    )
+
+
+def display_text_result(title: str, path: Path) -> None:
+    content = read_text_file(path)
     st.subheader(title)
 
     if not content:
@@ -273,136 +765,835 @@ def display_text_result(
 
     st.markdown(content)
 
-    st.download_button(
-        label=f"Download {title}",
-        data=content,
-        file_name=download_name,
-        mime="text/plain",
-        use_container_width=True,
-    )
 
+def display_flashcards() -> None:
+    st.subheader("Flashcards")
+    data = read_json_file(FLASHCARDS_PATH)
 
-def display_json_result(
-    title: str,
-    path: Path,
-    download_name: str,
-) -> None:
-    content = read_text_file(path)
-
-    st.subheader(title)
-
-    if not content:
-        st.info(f"{title} has not been generated yet.")
+    if not data:
+        st.info("Flashcards have not been generated yet.")
         return
 
-    st.code(content, language="json")
+    cards = data.get("flashcards", [])
+    st.caption(f"{len(cards)} cards — open one to reveal the answer.")
 
-    st.download_button(
-        label=f"Download {title}",
-        data=content,
-        file_name=download_name,
-        mime="application/json",
-        use_container_width=True,
-    )
+    for index, card in enumerate(cards, start=1):
+        question = card.get("question", "Question unavailable")
+
+        with st.expander(f"Card {index}: {question}"):
+            st.write(card.get("answer", "Answer unavailable"))
+
+            tip = card.get("exam_tip", "")
+            if tip:
+                st.info(f"Tip: {tip}")
+
+
+def display_quiz() -> None:
+    st.subheader("Quiz")
+    data = read_json_file(QUIZ_PATH)
+
+    if not data:
+        st.info("The quiz has not been generated yet.")
+        return
+
+    multiple_choice = data.get("multiple_choice", [])
+    true_false = data.get("true_false", [])
+    short_answer = data.get("short_answer", [])
+
+    with st.form("podcastai_quiz"):
+        mc_answers = []
+        tf_answers = []
+        written_answers = []
+
+        for index, question in enumerate(multiple_choice, start=1):
+            mc_answers.append(
+                st.radio(
+                    f"{index}. {question.get('question', '')}",
+                    question.get("options", []),
+                    index=None,
+                    key=f"mc_{index}",
+                )
+            )
+
+        for index, question in enumerate(true_false, start=1):
+            tf_answers.append(
+                st.radio(
+                    f"{index}. {question.get('statement', '')}",
+                    ["True", "False"],
+                    index=None,
+                    key=f"tf_{index}",
+                )
+            )
+
+        for index, question in enumerate(short_answer, start=1):
+            written_answers.append(
+                st.text_area(
+                    f"{index}. {question.get('question', '')}",
+                    key=f"short_{index}",
+                )
+            )
+
+        submitted = st.form_submit_button(
+            "Submit Quiz",
+            type="primary",
+            use_container_width=True,
+        )
+
+    if not submitted:
+        return
+
+    score = 0
+    marked_total = len(multiple_choice) + len(true_false)
+    st.header("Your Results")
+
+    for index, question in enumerate(multiple_choice, start=1):
+        correct = question.get("correct_answer", "")
+
+        if mc_answers[index - 1] == correct:
+            score += 1
+            st.success(f"Question {index}: Correct")
+        else:
+            st.error(f"Question {index}: Correct answer: {correct}")
+
+    offset = len(multiple_choice)
+
+    for index, question in enumerate(true_false, start=1):
+        expected = "True" if question.get("correct_answer") else "False"
+        number = offset + index
+
+        if tf_answers[index - 1] == expected:
+            score += 1
+            st.success(f"Question {number}: Correct")
+        else:
+            st.error(f"Question {number}: Correct answer: {expected}")
+
+    if marked_total:
+        percentage = round(score / marked_total * 100)
+        st.metric("Score", f"{score}/{marked_total}", f"{percentage}%")
+
+    for index, question in enumerate(short_answer, start=1):
+        st.markdown(f"**{index}. {question.get('question', '')}**")
+        st.write(f"Your answer: {written_answers[index - 1] or 'No answer'}")
+        st.info(f"Model answer: {question.get('model_answer', '')}")
+
+
+def display_audio() -> None:
+    mode = current_mode()
+    st.subheader("Story Audio" if mode == "story" else "Podcast")
+
+    if PODCAST_AUDIO_PATH.exists():
+        audio = PODCAST_AUDIO_PATH.read_bytes()
+        st.audio(audio, format="audio/wav")
+        st.caption("This audio uses AI-generated voices.")
+
+        st.download_button(
+            "Download Audio",
+            data=audio,
+            file_name=(
+                "story_audio.wav" if mode == "story" else "podcast_episode.wav"
+            ),
+            mime="audio/wav",
+            use_container_width=True,
+        )
+    else:
+        st.info("Audio has not been generated yet.")
+
+    script = read_text_file(PODCAST_SCRIPT_PATH)
+    if script:
+        with st.expander("Read the audio script"):
+            st.text(script)
 
 
 def display_results() -> None:
     st.divider()
-    st.header("Your results")
+    st.header("Your complete results")
 
     tabs = st.tabs(
-        [
-            "Overview",
-            "Study Notes",
-            "Flashcards",
-            "Quiz",
-            "Podcast",
-        ]
+        ["Overview", "Study Notes", "Flashcards", "Quiz", "Audio"]
     )
 
     with tabs[0]:
-        analysis = read_text_file(ANALYSIS_PATH)
-
-        if analysis:
-            with st.expander(
-                "Document analysis",
-                expanded=False,
-            ):
-                st.code(analysis, language="json")
-
-        display_text_result(
-            "Summary",
-            SUMMARY_PATH,
-            "summary.txt",
-        )
+        display_text_result("Summary", SUMMARY_PATH)
 
     with tabs[1]:
-        display_text_result(
-            "Study Notes",
-            NOTES_PATH,
-            "study_notes.txt",
-        )
+        display_text_result("Study Notes", NOTES_PATH)
 
     with tabs[2]:
-        display_json_result(
-            "Flashcards",
-            FLASHCARDS_PATH,
-            "flashcards.json",
-        )
+        display_flashcards()
 
     with tabs[3]:
-        display_json_result(
-            "Quiz",
-            QUIZ_PATH,
-            "quiz.json",
-        )
+        display_quiz()
 
     with tabs[4]:
-        script = read_text_file(PODCAST_SCRIPT_PATH)
+        display_audio()
 
-        if PODCAST_AUDIO_PATH.exists():
-            st.subheader("Podcast episode")
-            st.audio(str(PODCAST_AUDIO_PATH))
 
-            st.caption(
-                "This episode uses AI-generated voices."
-            )
-
-            st.download_button(
-                label="Download Podcast",
-                data=PODCAST_AUDIO_PATH.read_bytes(),
-                file_name="podcast_episode.wav",
-                mime="audio/wav",
-                use_container_width=True,
-            )
+def tasks_for_mode(
+    mode: str,
+    pack_type: str,
+    include_audio: bool,
+) -> list[str]:
+    if mode == "study":
+        if pack_type == "Quick Pack":
+            tasks = [
+                "Document analysis",
+                "Summary",
+                "Flashcards",
+                "Quiz",
+            ]
         else:
-            st.info("Podcast audio has not been generated yet.")
+            tasks = [
+                "Document analysis",
+                "Summary",
+                "Study notes",
+                "Flashcards",
+                "Quiz",
+                "Podcast script",
+            ]
 
-        if script:
-            with st.expander("Read podcast script"):
-                st.text(script)
+    elif mode == "story":
+        tasks = [
+            "Document analysis",
+            "Summary",
+            "Podcast script",
+        ]
+
+    elif mode == "research":
+        tasks = [
+            "Document analysis",
+            "Summary",
+            "Study notes",
+            "Podcast script",
+        ]
+
+    else:
+        tasks = [
+            "Document analysis",
+            "Summary",
+            "Podcast script",
+        ]
+
+    if include_audio:
+        tasks.append("Podcast audio")
+
+    return tasks
+
+
+
+
+def current_cache_key(
+    podcast_length: str,
+) -> str | None:
+    file_hash = st.session_state.get(
+        "current_file_hash"
+    )
+
+    if not file_hash:
+        return None
+
+    return build_cache_key(
+        file_hash=file_hash,
+        document_mode=current_mode(),
+        podcast_length=podcast_length,
+    )
+
+
+def try_restore_cached_pack(
+    podcast_length: str,
+) -> bool:
+    cache_key = current_cache_key(
+        podcast_length
+    )
+
+    if not cache_key or not cache_exists(
+        cache_key
+    ):
+        return False
+
+    metadata = restore_cache(
+        cache_key
+    )
+
+    st.session_state.current_cache_key = cache_key
+    st.session_state.cache_loaded = True
+    st.session_state.generation_complete = True
+    st.session_state.active_job_id = None
+
+    st.success(
+        "Previously generated results were found "
+        "and loaded from the smart cache."
+    )
+
+    created_at = metadata.get(
+        "created_at"
+    )
+
+    if created_at:
+        st.caption(
+            f"Cached on: {created_at}"
+        )
+
+    return True
+
+
+def save_current_pack_to_cache(
+    *,
+    podcast_length: str,
+    generated_tasks: list[str],
+) -> None:
+    cache_key = current_cache_key(
+        podcast_length
+    )
+
+    file_hash = st.session_state.get(
+        "current_file_hash"
+    )
+
+    uploaded_name = st.session_state.get(
+        "uploaded_name"
+    )
+
+    if (
+        not cache_key
+        or not file_hash
+        or not uploaded_name
+    ):
+        return
+
+    save_cache(
+        cache_key=cache_key,
+        original_filename=uploaded_name,
+        file_hash=file_hash,
+        document_mode=current_mode(),
+        podcast_length=podcast_length,
+        generated_tasks=generated_tasks,
+    )
+
+    st.session_state.current_cache_key = cache_key
+
+
+
+
+def build_background_task_specs(
+    selected_tasks: list[str],
+    podcast_length: str,
+) -> list[dict[str, Any]]:
+    """
+    Expand user choices into a dependency-aware background pipeline.
+
+    A standard Quick Pack is generated by one parallel coordinator so
+    Summary, Flashcards and Quiz run at the same time. Document analysis
+    is not repeated because it already ran during Analyse Material.
+    """
+
+    mode = current_mode()
+    requested = set(selected_tasks)
+
+    quick_pack_core = {
+        "Document analysis",
+        "Summary",
+        "Flashcards",
+        "Quiz",
+    }
+
+    if requested == quick_pack_core:
+        return [
+            {
+                "name": "Quick Pack resources",
+                "script_name": "quick_pack_parallel.py",
+                "environment": {},
+                "max_attempts": 2,
+            }
+        ]
+
+    requested.discard("Document analysis")
+
+    ordered_names: list[str] = []
+
+    def add_task(task_name: str) -> None:
+        if task_name not in ordered_names:
+            ordered_names.append(task_name)
+
+    for task_name in TASK_ORDER:
+        if task_name in requested:
+            add_task(task_name)
+
+    if "Podcast audio" in requested:
+        if mode == "study":
+            dependencies = ["Study notes", "Podcast script"]
+        elif mode in {"work", "research", "general"}:
+            dependencies = ["Summary", "Podcast script"]
+        else:
+            dependencies = ["Podcast script"]
+
+        without_audio = [
+            name
+            for name in ordered_names
+            if name != "Podcast audio"
+        ]
+
+        ordered_names = []
+
+        for dependency in dependencies:
+            add_task(dependency)
+
+        for task_name in without_audio:
+            add_task(task_name)
+
+        add_task("Podcast audio")
+
+    task_specs: list[dict[str, Any]] = []
+
+    for task_name in ordered_names:
+        environment: dict[str, str] = {}
+
+        if task_name == "Podcast script":
+            environment["PODCASTAI_PODCAST_LENGTH"] = podcast_length
+
+        task_specs.append(
+            {
+                "name": task_name,
+                "script_name": TASKS[task_name],
+                "environment": environment,
+                "max_attempts": 2,
+            }
+        )
+
+    return task_specs
+
+
+def start_background_generation(
+    selected_tasks: list[str],
+    podcast_length: str,
+) -> str:
+    task_specs = build_background_task_specs(
+        selected_tasks,
+        podcast_length,
+    )
+
+    job_id = create_and_start_job(
+        title=(
+            f"PodcastAI {current_mode()} generation"
+        ),
+        tasks=task_specs,
+        metadata={
+            "document_mode": current_mode(),
+            "podcast_length": podcast_length,
+            "uploaded_name": st.session_state.get(
+                "uploaded_name"
+            ),
+            "file_hash": st.session_state.get(
+                "current_file_hash"
+            ),
+            "selected_tasks": selected_tasks,
+        },
+    )
+
+    st.session_state.active_job_id = job_id
+    st.session_state.active_job_length = podcast_length
+    st.session_state.active_job_selected_tasks = list(
+        selected_tasks
+    )
+    st.session_state.active_job_cache_saved = False
+    st.session_state.generation_complete = False
+
+    return job_id
+
+
+def task_status_icon(status: str) -> str:
+    return {
+        "queued": "○",
+        "running": "◌",
+        "retrying": "↻",
+        "completed": "✅",
+        "failed": "⚠️",
+        "cancelled": "⛔",
+    }.get(status, "•")
+
+
+def display_completed_background_resource(
+    task_name: str,
+) -> None:
+    """
+    Reveal a resource as soon as its task has completed.
+    """
+
+    container = st.container()
+    show_live_result(
+        task_name,
+        container,
+    )
+
+
+@st.fragment(run_every="1s")
+def display_background_job() -> None:
+    """
+    Poll only the progress panel once per second.
+
+    The rest of the page remains responsive while worker.py continues
+    independently in the background.
+    """
+
+    job_id = st.session_state.get(
+        "active_job_id"
+    )
+
+    if not job_id:
+        return
+
+    job = read_job(job_id)
+
+    if not job:
+        st.error(
+            "The background job could not be read."
+        )
+        return
+
+    status = str(
+        job.get("status", "unknown")
+    )
+
+    progress_value = max(
+        0,
+        min(
+            int(job.get("progress", 0)),
+            100,
+        ),
+    )
+
+    st.markdown("## Live generation")
+    st.progress(
+        progress_value,
+        text=(
+            f"{progress_value}% — "
+            f"{job.get('message', 'Working...')}"
+        ),
+    )
+
+    current_task = job.get(
+        "current_task_name"
+    )
+
+    if current_task:
+        st.info(
+            f"Current task: **{current_task}**"
+        )
+
+    metric_one, metric_two, metric_three = (
+        st.columns(3)
+    )
+
+    metric_one.metric(
+        "Completed",
+        int(job.get("completed_tasks", 0)),
+    )
+    metric_two.metric(
+        "Failed",
+        int(job.get("failed_tasks", 0)),
+    )
+    metric_three.metric(
+        "Total",
+        int(job.get("total_tasks", 0)),
+    )
+
+    with st.expander(
+        "Generation steps",
+        expanded=True,
+    ):
+        for task in job.get("tasks", []):
+            task_name = str(
+                task.get("name", "Task")
+            )
+            task_status = str(
+                task.get("status", "queued")
+            )
+            task_progress = int(
+                task.get("progress", 0)
+            )
+            task_message = str(
+                task.get("message", "")
+            )
+
+            st.write(
+                f"{task_status_icon(task_status)} "
+                f"**{task_name}** — "
+                f"{task_status.replace('_', ' ').title()}"
+            )
+
+            if task_status in {
+                "running",
+                "retrying",
+            }:
+                st.progress(
+                    max(
+                        0,
+                        min(task_progress, 100),
+                    ),
+                    text=task_message,
+                )
+            elif task_message:
+                st.caption(task_message)
+
+            if (
+                task_status == "failed"
+                and task.get("diagnostic_report")
+            ):
+                diagnostic = task[
+                    "diagnostic_report"
+                ]
+
+                with st.expander(
+                    f"{task_name} technical details"
+                ):
+                    st.write(
+                        "**Likely cause:** "
+                        f"{diagnostic.get('likely_cause')}"
+                    )
+                    st.write(
+                        "**Suggested fix:** "
+                        f"{diagnostic.get('suggested_fix')}"
+                    )
+
+    st.markdown("### Ready now")
+
+    completed_any = False
+    displayed_resources: set[str] = set()
+
+    for resource_name in job.get("ready_resources", []):
+        resource_name = str(resource_name)
+
+        if resource_name in {
+            "Summary",
+            "Study notes",
+            "Flashcards",
+            "Quiz",
+            "Podcast script",
+            "Podcast audio",
+        }:
+            completed_any = True
+            displayed_resources.add(resource_name)
+            display_completed_background_resource(
+                resource_name
+            )
+
+    for task in job.get("tasks", []):
+        task_name = str(task.get("name"))
+
+        if (
+            task.get("status") == "completed"
+            and task_name not in displayed_resources
+            and task_name != "Quick Pack resources"
+        ):
+            completed_any = True
+            displayed_resources.add(task_name)
+            display_completed_background_resource(
+                task_name
+            )
+
+    if not completed_any:
+        st.caption(
+            "Your first completed resource will "
+            "appear here automatically."
+        )
+
+    if status not in {
+        "completed",
+        "completed_with_errors",
+        "failed",
+        "cancelled",
+    }:
+        if st.button(
+            "Cancel generation",
+            key=f"cancel_{job_id}",
+        ):
+            request_cancel(job_id)
+            st.warning(
+                "Cancellation requested."
+            )
+
+        return
+
+    if status == "completed":
+        st.success(
+            "All requested content is ready."
+        )
+    elif status == "completed_with_errors":
+        st.warning(
+            "Generation finished, but one or "
+            "more tasks failed."
+        )
+    elif status == "cancelled":
+        st.warning(
+            "Generation was cancelled."
+        )
+    else:
+        st.error(
+            "Generation failed."
+        )
+
+    successful_tasks = [
+        str(resource_name)
+        for resource_name in job.get("ready_resources", [])
+    ]
+
+    successful_tasks.extend(
+        str(task.get("name"))
+        for task in job.get("tasks", [])
+        if (
+            task.get("status") == "completed"
+            and task.get("name") != "Quick Pack resources"
+        )
+    )
+
+    successful_tasks = list(dict.fromkeys(successful_tasks))
+
+    if (
+        successful_tasks
+        and not st.session_state.get(
+            "active_job_cache_saved",
+            False,
+        )
+    ):
+        save_current_pack_to_cache(
+            podcast_length=st.session_state.get(
+                "active_job_length",
+                "Standard",
+            ),
+            generated_tasks=successful_tasks,
+        )
+
+        st.session_state.active_job_cache_saved = True
+
+    st.session_state.generation_complete = bool(
+        successful_tasks
+    )
+
+    if successful_tasks:
+        display_results()
+
+
+
+def display_developer_panel() -> None:
+    """
+    Show the latest diagnostic report only when Developer Mode is enabled.
+    """
+
+    st.session_state.developer_mode = st.sidebar.checkbox(
+        "Developer Mode",
+        value=st.session_state.developer_mode,
+        help=(
+            "Shows technical diagnostics. Keep this disabled "
+            "for normal beta users."
+        ),
+    )
+
+    if not st.session_state.developer_mode:
+        return
+
+    latest = load_latest_report()
+
+    st.sidebar.divider()
+    st.sidebar.subheader("Diagnostic Centre")
+
+    if not latest:
+        st.sidebar.info(
+            "No diagnostic report has been created yet."
+        )
+        return
+
+    status = str(
+        latest.get("status", "unknown")
+    ).upper()
+
+    if status == "SUCCESS":
+        st.sidebar.success(
+            f"Latest task: {status}"
+        )
+    else:
+        st.sidebar.error(
+            f"Latest task: {status}"
+        )
+
+    st.sidebar.write(
+        f"**Stage:** {latest.get('stage', 'Unknown')}"
+    )
+    st.sidebar.write(
+        f"**Script:** {latest.get('script_name', 'Unknown')}"
+    )
+    st.sidebar.write(
+        f"**Duration:** "
+        f"{latest.get('duration_seconds', 'Unknown')} seconds"
+    )
+
+    if latest.get("error_type"):
+        st.sidebar.write(
+            f"**Error:** {latest.get('error_type')}"
+        )
+
+    if latest.get("likely_cause"):
+        st.sidebar.warning(
+            latest.get("likely_cause")
+        )
+
+    if latest.get("suggested_fix"):
+        st.sidebar.info(
+            latest.get("suggested_fix")
+        )
+
+    location = []
+
+    if latest.get("source_file"):
+        location.append(
+            str(latest.get("source_file"))
+        )
+
+    if latest.get("source_function"):
+        location.append(
+            str(latest.get("source_function"))
+        )
+
+    if latest.get("source_line"):
+        location.append(
+            f"line {latest.get('source_line')}"
+        )
+
+    if location:
+        st.sidebar.caption(
+            "Location: " + " • ".join(location)
+        )
+
+    report_json = json.dumps(
+        latest,
+        indent=2,
+        ensure_ascii=False,
+    )
+
+    st.sidebar.download_button(
+        "Download diagnostic report",
+        data=report_json,
+        file_name="podcastai_diagnostic.json",
+        mime="application/json",
+        use_container_width=True,
+    )
+
+    with st.sidebar.expander(
+        "Full diagnostic details"
+    ):
+        st.code(
+            report_json,
+            language="json",
+        )
+
 
 
 def display_home() -> None:
     st.markdown(
         """
         <div class="hero">
-            <div class="hero-title">🎓 PodcastAI</div>
+            <div class="hero-title">🎧 PodcastAI</div>
             <div class="hero-text">
-                One upload. Start learning your way.
+                One upload. The right experience for every document.
             </div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    st.markdown(
-        """
-        <div class="info-card">
-            <strong>Upload your material</strong><br>
-            <span class="small-note">
-                Use a PDF or a clear image of printed notes.
-            </span>
         </div>
         """,
         unsafe_allow_html=True,
@@ -411,142 +1602,164 @@ def display_home() -> None:
     uploaded_file = st.file_uploader(
         "Choose a PDF or image",
         type=["pdf", "jpg", "jpeg", "png", "webp"],
-        help=(
-            "Uploaded material remains local during this "
-            "development version."
-        ),
     )
 
     if uploaded_file is not None:
         st.success(f"Selected: {uploaded_file.name}")
 
-        if st.button(
-            "Analyse Material",
-            type="primary",
-        ):
-            with st.spinner("Reading your material..."):
-                success, output = extract_uploaded_material(
-                    uploaded_file
+        if st.button("Analyse Material", type="primary"):
+            with st.spinner("Reading and understanding your material..."):
+                extraction_success, extraction_output = (
+                    extract_uploaded_material(uploaded_file)
                 )
 
-            if success and EXTRACTED_TEXT_PATH.exists():
-                extracted = read_text_file(
-                    EXTRACTED_TEXT_PATH
-                )
-
-                if extracted:
-                    st.session_state.material_ready = True
-                    st.session_state.uploaded_name = (
-                        uploaded_file.name
-                    )
-                    st.success(
-                        "Your material is ready for generation."
-                    )
+                if extraction_success:
+                    analysis_success, analysis_output = analyse_current_material()
                 else:
-                    st.error(
-                        "No readable text was extracted."
-                    )
+                    analysis_success = False
+                    analysis_output = ""
+
+            if (
+                extraction_success
+                and analysis_success
+                and read_text_file(EXTRACTED_TEXT_PATH)
+            ):
+                st.session_state.material_ready = True
+                st.session_state.uploaded_name = uploaded_file.name
+                st.success("Your material is ready.")
             else:
-                st.error(
-                    "The material could not be processed."
+                st.error("The material could not be analysed.")
+
+                details = "\n\n".join(
+                    item
+                    for item in (extraction_output, analysis_output)
+                    if item
                 )
 
-                if output:
+                if details:
                     with st.expander("Technical details"):
-                        st.code(output)
+                        st.code(details)
 
     if not st.session_state.material_ready:
-        st.info(
-            "Upload and analyse a file to unlock generation options."
-        )
+        st.info("Upload and analyse a file to continue.")
         return
 
-    st.divider()
+    display_analysis_card()
 
+    st.divider()
     st.header("What would you like to create?")
 
-    mode = st.radio(
+    mode = current_mode()
+    generation_mode = st.radio(
         "Generation mode",
-        options=[
-            "Quick Task",
-            "Quick Pack",
-            "Full Study Pack",
-        ],
+        ["Quick Task", "Quick Pack", "Full Pack"],
         horizontal=True,
     )
 
-    selected_tasks: list[str]
+    selected_tasks: list[str] = []
 
-    if mode == "Quick Task":
+    if generation_mode == "Quick Task":
         selected_tasks = st.multiselect(
             "Choose one or more features",
             options=list(TASKS.keys()),
             default=["Summary"],
         )
-
-    elif mode == "Quick Pack":
-        st.caption(
-            "A fast overview with a summary, flashcards and quiz."
-        )
-
-        selected_tasks = [
-            "Document analysis",
-            "Summary",
-            "Flashcards",
-            "Quiz",
-        ]
-
     else:
         include_audio = st.checkbox(
-            "Include two-voice podcast audio",
+            "Include story audio" if mode == "story" else "Include audio",
             value=False,
+        )
+
+        selected_tasks = tasks_for_mode(
+            mode,
+            generation_mode,
+            include_audio,
+        )
+
+        st.caption("Included: " + ", ".join(selected_tasks))
+
+    needs_audio = (
+        "Podcast audio" in selected_tasks
+        or "Podcast script" in selected_tasks
+    )
+
+    podcast_length = "Standard"
+
+    if needs_audio:
+        podcast_length = st.select_slider(
+            "Audio length",
+            options=["Quick", "Standard", "Deep Dive"],
+            value="Standard",
             help=(
-                "Audio takes longer and may use more API credit."
+                "Quick is fastest and cheapest. Deep Dive takes "
+                "longer and uses more API credit."
             ),
         )
 
-        selected_tasks = [
-            "Document analysis",
-            "Summary",
-            "Study notes",
-            "Flashcards",
-            "Quiz",
-            "Podcast script",
-        ]
+    active_job_id = st.session_state.get(
+        "active_job_id"
+    )
 
-        if include_audio:
-            selected_tasks.append("Podcast audio")
+    active_job = (
+        read_job(active_job_id)
+        if active_job_id
+        else None
+    )
+
+    job_running = bool(
+        active_job
+        and not is_finished(active_job)
+    )
 
     if st.button(
         "✨ Generate",
         type="primary",
-        disabled=not selected_tasks,
+        disabled=(
+            not selected_tasks
+            or job_running
+        ),
     ):
-        results = generate_tasks(selected_tasks)
+        apply_mode_override(mode)
 
-        st.session_state.generation_complete = any(
-            success for success, _ in results.values()
+        cache_loaded = try_restore_cached_pack(
+            podcast_length
         )
 
-        failed_outputs = {
-            task: output
-            for task, (success, output) in results.items()
-            if not success
-        }
+        if cache_loaded:
+            st.session_state.active_job_id = None
+        else:
+            job_id = start_background_generation(
+                selected_tasks,
+                podcast_length,
+            )
 
-        if failed_outputs:
-            with st.expander("Generation details"):
-                for task, output in failed_outputs.items():
-                    st.write(f"**{task}**")
-                    st.code(output or "No details returned.")
+            st.success(
+                "Generation started in the background."
+            )
+            st.caption(
+                f"Job ID: {job_id}"
+            )
 
-    if st.session_state.generation_complete:
+    if job_running:
+        st.caption(
+            "A generation job is already running."
+        )
+
+    display_background_job()
+
+    if (
+        st.session_state.generation_complete
+        and not st.session_state.get(
+            "active_job_id"
+        )
+    ):
         display_results()
 
 
 def main() -> None:
     configure_page()
     initialise_state()
+    display_developer_panel()
     display_home()
 
 

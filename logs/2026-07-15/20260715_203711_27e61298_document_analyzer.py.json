@@ -1,0 +1,27 @@
+{
+  "run_id": "20260715_203711_27e61298",
+  "stage": "Document analysis",
+  "script_name": "document_analyzer.py",
+  "status": "success",
+  "started_at": "2026-07-15T20:37:02.646407+00:00",
+  "finished_at": "2026-07-15T20:37:11.729039+00:00",
+  "duration_seconds": 9.083,
+  "return_code": 0,
+  "attempt": 1,
+  "error_type": null,
+  "error_message": null,
+  "source_file": null,
+  "source_function": null,
+  "source_line": null,
+  "likely_cause": null,
+  "suggested_fix": null,
+  "retryable": false,
+  "stdout": "Analysing document type...\n\nAnalysis complete!\n--------------------------------------------------\nTitle: Titanic Summary and Study Guide\nMode: study\nType: Book Summary and Study Guide\nConfidence: 95%\nTopics/chapters: 14\nDifficulty: Easy\nReading time: 45 min\nLearning time: 90 min\nRecommended pack: Study Pack\nAudio style: Tutor Conversation\n\nRecommended outputs:\n- Chapter-by-chapter summary\n- Key themes and takeaways\n- Timeline of events\n- Character and witness guide\n- Critical thinking prompts\n- Quiz and test questions\n- Key quotes list\n- Audio study conversation\n\nWarnings:\n- Several pages contain no selectable text.\n- Some content appears to be promotional or app-related, such as Bookey links and prompts to unlock full text/audio.\n- The document is a secondary summary/study guide rather than the full original book.\n\nSaved to: C:\\Users\\jackb\\OneDrive\\Desktop\\podcastAI\\data\\analysis\\analysis.json",
+  "stderr": "",
+  "traceback_text": "",
+  "metadata": {
+    "job_id": "20260715_203701_d55e0afdb3",
+    "task_id": "task_1",
+    "background_worker": true
+  }
+}

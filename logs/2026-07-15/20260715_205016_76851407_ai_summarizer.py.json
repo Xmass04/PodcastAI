@@ -1,0 +1,27 @@
+{
+  "run_id": "20260715_205016_76851407",
+  "stage": "Summary",
+  "script_name": "ai_summarizer.py",
+  "status": "success",
+  "started_at": "2026-07-15T20:49:44.180157+00:00",
+  "finished_at": "2026-07-15T20:50:16.345960+00:00",
+  "duration_seconds": 32.166,
+  "return_code": 0,
+  "attempt": 1,
+  "error_type": null,
+  "error_message": null,
+  "source_file": null,
+  "source_function": null,
+  "source_line": null,
+  "likely_cause": null,
+  "suggested_fix": null,
+  "retryable": false,
+  "stdout": "Generating summary...\nSummary saved to:\ndata\\summaries\\summary.txt",
+  "stderr": "",
+  "traceback_text": "",
+  "metadata": {
+    "job_id": "20260715_204934_a3241e71cd",
+    "task_id": "task_2",
+    "background_worker": true
+  }
+}

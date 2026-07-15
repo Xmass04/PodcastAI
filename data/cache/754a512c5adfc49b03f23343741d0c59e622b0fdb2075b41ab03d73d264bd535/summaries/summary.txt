@@ -1,0 +1,73 @@
+## Overview
+
+This document is a 1994 lecture by Per Hedemann Jensen on the **Chernobyl nuclear accident of 26 April 1986**, explaining its causes, radioactive releases, emergency response, radiation health effects, and consequences inside and outside the USSR. It describes the accident as a result of unsafe test conditions, reactor design features, and major violations of operating procedures.
+
+---
+
+## 1. The Accident: What Happened
+
+- The accident occurred in the early hours of **Saturday 26 April 1986** at **Chernobyl Unit 4**.
+- At about **01:24 Moscow time**, **two explosions** occurred in quick succession.
+- The explosions:
+  - Blew the roof off the Unit 4 reactor building.
+  - Exposed the reactor core to outside air.
+  - Threw out concrete, graphite, fuel and debris.
+  - Sent smoke and radioactive material more than **1 km** into the air.
+- Heavy material fell near the site, while lighter radioactive particles formed a cloud that moved mainly **west, north and northwest**.
+
+---
+
+## 2. Causes and Initiating Events
+
+### Purpose of the test
+
+- On **25–26 April 1986**, operators planned an electrical systems test before scheduled maintenance.
+- The test aimed to check whether the turbine generators could keep essential systems supplied during a major station blackout.
+- It was treated as an **electrical test**, not a nuclear safety issue.
+- Because of this:
+  - Electrical experts directed the test.
+  - Nuclear safety received little attention.
+  - Proper authorisations were not obtained.
+
+### Reactor type
+
+- Unit 4 was an **RBMK reactor**.
+- RBMK means **Reaktor Bolshoy Moshchnosty Kipyaschiy**, translated as **Large Power Boiling Reactor**.
+
+---
+
+## 3. Timeline of the Accident
+
+### 25 April 1986: Preparation
+
+- **01:00** – Power reduction began.
+- **13:05** – Reactor power reached **50%**, equal to **1,600 MW(th)**.
+- Turbogenerator No. 7 was shut down.
+- Shortly afterwards, the **Emergency Core Cooling System** was isolated.
+  - This system is designed to cool the reactor core in an emergency.
+- Power stayed at this level for about **9 hours**.
+- **23:00** – Power reduction resumed.
+
+### Power dropped too low
+
+- The intended power level was **700 MW(th)**.
+- Instead, power fell to **30 MW(th)**.
+- Operators manually withdrew control rods and raised power only to **200 MW(th)**.
+- Continuous operation below **700 MW(th)** was forbidden because of the RBMK’s behaviour at low power.
+
+### Important term: positive power/void coefficient
+
+- A **positive void coefficient** means that when more steam bubbles form in the coolant, reactor power can increase further.
+- In simple terms:  
+  **a small power rise can cause more steam, which causes an even bigger power rise.**
+
+---
+
+## 4. Safety Violations Before the Explosion
+
+### Blocking shutdown signals
+
+- At **01:19 on 26 April**, operators increased feedwater flow.
+- They had difficulty controlling pressure and water level.
+- They blocked shutdown signals linked to:
+  - Steam drum level

@@ -1,0 +1,799 @@
+========== PAGE 1 ==========
+
+General rights 
+Copyright and moral rights for the publications made accessible in the public portal are retained by the authors and/or other copyright 
+owners and it is a condition of accessing publications that users recognise and abide by the legal requirements associated with these rights. 
+ 
+ Users may download and print one copy of any publication from the public portal for the purpose of private study or research. 
+ You may not further distribute the material or use it for any profit-making activity or commercial gain 
+ You may freely distribute the URL identifying the publication in the public portal 
+ 
+If you believe that this document breaches copyright please contact us providing details, and we will remove access to the work immediately 
+and investigate your claim. 
+  
+ 
+   
+ 
+ 
+Downloaded from orbit.dtu.dk on: Jul 14, 2026
+The Chernobyl accident in 1986. Causes and consequences
+Jensen, Per Hedemann
+Publication date:
+1994
+Document Version
+Publisher's PDF, also known as Version of record
+Link back to DTU Orbit
+Citation (APA):
+Jensen, P. H. (1994). The Chernobyl accident in 1986. Causes and consequences. Abstract from General
+physics colloquium, Aarhus, Denmark.
+
+========== PAGE 2 ==========
+
+Lecture at the Institute of Physics and Astronomy, University of Aarhus, 30 November 1994
+The Chernobyl accident in 1986 - Causes and Consequences
+Per Hedemann Jensen
+Risø National Laboratory
+DK-4000 Roskilde, Denmark
+1
+Introduction
+At the time of the accident, in the early hours of Saturday 26 April 1986, nearly 200 employees
+at the Chernobyl nuclear power plant were engaged in the normal operation of Units 1, 2 and 3 and
+the experiment at Unit 4 that was to lead to the devastating explosion. A further 300 people were
+were working on the night shift to construct two further reactors (Units 5 and 6) about a kilometre
+away. At around 01:24 Moscow time, two explosions in quick succession blew the roof off the
+Unit 4 reactor building, sending concrete, graphite and debris flying and leaving a gaping hole
+exposing the reactor core to the outside air. Smoke and fumes rose over 1 km into the air, together
+with a large amount of uranium fuel, transuranics and fission products from the reactor core,
+including essentially all the noble gases. The heavy material fell out near the site, but lighter
+particles drifted to the west and north of the plant in a radioactive cloud that contaminated the
+surface wherever it touched down. The lightest material was carried up by the heat of the explosion
+to over 1 km in altitude and was blown to the northwest.
+2
+Initiating events
+Chernobyl Unit 4 had operated successfully for three years, with more than 100 reactor years of
+operation for this RBMK1 reactor type. The intent on 25-26 April 1986 was to carry out a special
+electrical systems test just prior to taking the Chernobyl Unit 4 out of service for scheduled
+maintenance. The purpose of this was to demonstrate improvements in the capacity of the turbine
+generators to support essential systems during a major station blackout. This was to be done by
+cutting steam supplies to one of the turbine generators and testing the capacity for supply at correct
+voltage during its inertial rundown using main coolant flow pumps as the load. The test was
+intended as a purely electrotechnical one which was thought to have no impact on nuclear safety.
+As a result, the initiative and direction of the test were left to electrical experts. Little emphasis was
+put on nuclear safety, and proper authorizations were not obtained.
+Start of experiment
+At 01:00 on 25 April, preparation for the test was begun by the start of power reduction. At 13:05
+the reactor power reached 50% (1,600 MW(th)) and turbogenerator No. 7 was shut down. Shortly
+afterwards the Emergency Core Cooling System (EECS) was isolated. The power remained at this
+level for about 9 hours. At 23:00 power reduction resumed. The generator power was reduced to
+700 MW(th) but it proved difficult and the power level dropped to 30 MW(th) and it was only
+1 Reaktor Bolshoy Moshchnosty Kipyaschiy (Large Power Boiling Reactor).
+1
+
+========== PAGE 3 ==========
+
+Lecture at the Institute of Physics and Astronomy, University of Aarhus, 30 November 1994
+possible to bring it back to a level of 200 MW(th) by manually withdrawing the control rods. A
+power level below 700 MW(th) is forbidden for continuous operation due to the positive power
+coefficient for the RBMK reactor below about 20% power level (600 MW(th)). With a positive
+power coefficient, small changes in power will lead to much larger changes in steam void, with
+consequent power increases.
+Block of shutdown signal
+The reactor was operating at 200 MW(th), a level which is forbidden for continuous operation. At
+01:19 on 26 April the operators increased feedwater flow and having trouble with pressure and
+level control, they blocked the shutdown signals associated with steam drum level and pressure.
+When the operator decided that the steam drum level was sufficiently high he sharply reduced the
+feedwater flow, producing more positive reactivity. The operator received a printout showing that
+too many control rods were out of the core and that there was not enough reactivity reserve to meet
+the shutdown requirement. The reactor should at this point have been shut down.
+Switch off reactor trip system
+At 01:23:04 the reactor trip on loss of the second generator was switched off and the emergency
+stop valve to the turbine was closed. This was done to allow a repeat of the test if needed. This
+was a key violation of the test programme as it was the removal of the last safety system that
+would have saved the reactor.
+Prompt criticality
+At 01:23:30 the power began to increase. The shift foreman ordered shutdown of the reactor at
+01:23:40, but by that time it was too late. There was insufficient reactivity left in the control rods
+that were in the core, and the others at the top of the core could not be inserted fast enough to
+counteract the power increase. The positive void coefficient of reactivity inherent in the RBMK
+design continued to add more reactivity and the prompt critical value was exceeded. The power
+excursion reached 100 times the full power within four seconds, corresponding to 300,000 MW(th).
+Explosion of reactor
+An explosion occurred and about 30% of the fuel in the core fragmented, leading to an interaction
+with water and subsequent steam production. The explosion lifted the 1,000 tonnes core plate with
+subsequent rupture of all fuel channels and the roof of the building was blown off. A second
+explosion occurred a few seconds after the first explosion, either as a second power excursion or
+as exploding hydrogen. About 25% of the graphite blocks and material from the fuel channels were
+ejected through the destroyed roof.
+Break out of fire
+A fire started in the graphite surrounding the core and also on the roof of the adjoining turbine
+building and on the roof of Unit 3. Alarms went out to fire units in the region and within minutes
+plant firemen arrived. None of the firemen had been trained in fighting fires involving radioactive
+materials. By dawn on Saturday, the more than 100 firemen had succeeded in putting out the roof
+fires, and about 05:00 all but the graphite fire in the core had been extinguished. Firemen, rescue
+workers and operating personnel were generally unaware of the seriousness of the radiation risk.
+The high radiation levels could not be measured with available monitoring equipment and in some
+areas the radiation level must have exceeded 100 Gy h-1. Unit 3 was shut down around 03:00, an
+hour and a half after the accident, while Units 1 and 2 were not shut down until the following
+night, about 24 hours after the accident.
+2
+
+========== PAGE 4 ==========
+
+Lecture at the Institute of Physics and Astronomy, University of Aarhus, 30 November 1994
+3
+Radionuclide release and accident management
+The Chernobyl accident provides a demonstration of several features of radionuclide releases that
+had, in the past, been merely predictions and subject to technical controversy. It is now confirmed
+that extensive releases of radioactive materials can occur in severe reactor accidents. Furthermore,
+it is clear that the materials can be transported considerable distances from the reactor.
+Release of activity
+The Chernobyl Unit 4 core contained a radioactive inventory of about 4 1019 Bq (109 Ci) at the
+time of the accident. On the basis of radiation measurements and various technical analyses of
+samples taken from a 30 km radius around the Chernobyl plant and throughout the Soviet Union,
+it has been estimated that about 1-2 1018 Bq (3-5 107 Ci) of volatiles were released from the fuel
+during the accident and equal amounts of the noble gases xenon and krypton. The noble gases are
+thought to have been completely expelled from the fuel. About 10-20% of the volatile radionuclides
+iodine, caesium and tellurium were expelled from the fuel. Releases of the more refractory
+radionuclides barium, strontium, plutonium, cerium, etc. amounted to 3-6%. The release of
+radionuclides did not occur in a single massive event. Rather, only 25% of the release took place
+during the first day of the accident. The rest of the release took place as a protracted process over
+a nine-day period. The distribution of activity deposited around the Chernobyl was 0.3-0.5% of the
+core inventory on-site, 1.5-2% within 20 km, and 1-1.5% beyond 20 km. The time distribution of
+the release is shown at Figure 1.
+Days after 26 April 1986
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+0
+10
+20
+30
+40
+50
+Total release: 4 EBq
+Release rate (x 1016 Bq/day)
+Figure 1. Release of activity from the Chernobyl reactor in the period 26 April to 7 May
+1986.
+Accident management operations
+On 28 April a massive accident management operation began. This involved dropping various
+materials into the reactor well from helicopters. These included boron carbide (B4C) to ensure
+against recriticality, dolomite ((MgCa)(CO3)2) to generate carbon dioxide that could provide ’gas
+blanketing’ and could contribute to absorbing the energy of the burning graphite, clay/sand to
+3
+
+========== PAGE 5 ==========
+
+Lecture at the Institute of Physics and Astronomy, University of Aarhus, 30 November 1994
+introduce an immediate filtration for radionuclides being released and to quench the fire, and lead
+to absorb heat by melting and to provide a liquid layer that would solidify to seal and shield the
+top of the core vault. In total, about 5,000 tonnes of materials were dropped into the core vault.
+Specialist team from Moscow
+The authorities in Moscow were alerted about the accident on 26 April and a specialist team was
+immediately dispatched to the site to assist local authorities and plant management to deal with the
+situation. Initially there were some problems in accurately reporting the severity of the accident
+situation at the plant and off-site.
+On their arrival the specialist team found a very serious situation. One of the initial
+decisions was that a precautionary evacuation of the town of Pripyat should be carried out as soon
+as possible. On the morning of 26 April, people were instructed to remain indoors with windows
+and doors shot. To prevent the accumulation of radioisotopes of iodine (mostly 131I) from the plume
+in the thyroid glands of members of the public, potassium iodide (KI) tablets were distributed to
+the population of the surrounding zone. This was done employing to hand the tablets to individual
+residents on a door-to-door basis, starting at the morning of 26 April. Late in the night of 26 April,
+radiation levels in Pripyat started rising, reaching a value of the order of 10 mSv h-1 on 27 April.
+It was therefore decided to evacuate the city.
+Evacuation of the city of Pripyat
+Around noon on Sunday 27 April, when the evacuation order had been authorized and all
+preparations were complete, a short official announcement was broadcast to city residents to pack
+provisions for three days and to be ready to leave at 14:00. Finally, the nearly 1,200 buses
+assembled near the settlement of Chernobyl (20 km southeast of Pripyat and 17 km southeast of
+the plant) set off in a line several kilometres long along the road that passed over the railway just
+west of Unit 4.
+Evacuation of Pripyat began at 14:00. Buses were provided directly at the entrance of each
+building. As soon as each bus was loaded in front of its assigned apartment building, it set off to
+join a police escorted line to the reception centres about 50 km away to the west-southwest in
+Polesskoe and to the south-southwest Ivankov region of the Kiev district. There was adequate
+transport and the evacuation went smoothly. In less than three hours the city was emptied in
+orderly fashion of all but those with official duties. The over 44,000 evacuees were taken in by
+individual families who lived mostly in settlements in the surrounding regions.
+Evacuation of 30-km zone
+On 28 April, the Civil Defence Chief of Staff of the USSR proposed the evacuation of the
+Chernobyl plant site and the establishment of a 10 km exclusion zone around the plant. On 2 May,
+it was decided at a Governmental Commission meeting to evacuate the people from the ’geometric’
+30-km zone around the plant, mainly because of the lack of predictions on the radioactive
+behaviour under the prevailing meteorological conditions. The evacuation of the entire 30-km zone
+was completed by 6 May with a total of 115,000 people. The zone remains evacuated, although
+some people have been allowed to go back to their homes in the less contaminated southern areas.
+4
+Radiation biology
+As ionizing radiation passes through human tissue, it can transfer energy and ionize atoms in
+cellular molecules that are biologically important for the function of cells. If cellular damage does
+occur and is not adequately repaired, it may prevent the cell from surviving or reproducing, or it
+may result in a viable but modified cell. The two outcomes have profoundly different implications
+4
+
+========== PAGE 6 ==========
+
+Lecture at the Institute of Physics and Astronomy, University of Aarhus, 30 November 1994
+for the organism as a whole, leading to socalled deterministic and stochastic effects. Stochastic
+effects are effects that occur at random, i.e. that are of statistical nature. Somatic effects, i.e. effects
+in the exposed individual, and prenatal effects in the embryo can be either deterministic or
+stochastic. Hereditary effects, i.e. effects in the progeny of the exposed individual, are stochastic.
+Deterministic effects
+Most organs and tissues of the body are unaffected by the loss of even substantial number of cells,
+but if the number lost is very large, there will be observable harm reflecting a loss of tissue
+function. If killed cells are not replaced, an acute effect will be clinically observed in the organism
+relatively shortly after irradiation. The given level of dose determines whether the effects occur or
+not, and a direct cause-effect relation can be clinically demonstrated for the irradiated individual.
+The likelihood of effects is zero at doses lower than some threshold dose and increases steeply to
+certainty (100%) above such a threshold dose, the severity of the harm is also increasing with dose.
+Not all cells in the body are equally radiosensitive and typically cells that divide rapidly are more
+radiosensitive than those that divide slowly or not at all (the reason why cancer cells are more
+sensitive to radiation than normal cells). Cells that have high sensitivity to radiation include
+lymphocytes and immature bone marrow. The dose response for the bone marrow syndrome is
+shown at Figure 2.
+Whole body dose, D (Gy)
+0
+2
+4
+6
+8
+10
+Probability of death, p(D) (%)
+0
+20
+40
+60
+80
+100
+Figure 2. Dose response for acute bone marrow syndrome as a function of absorbed whole
+body dose2 given over short time.
+It appears from Figure 2 that death is almost certain for an individual incurring a whole body dose
+of around 6 Gy or more over a short period of time. Doses of around 3 Gy may be lethal for
+around half of those in an irradiated population who receive little or no medical care (the median
+lethal dose, LD50). For healthy persons receiving good medical care, LD50 may be 5 Gy and as high
+as 9 Gy with very intensive medical treatment. For doses below 1 Gy the likelihood of
+2 The unit of absorbed dose is Gy (gray). 1 Gy = 1 J kg-1.
+5
+
+========== PAGE 7 ==========
+
+Lecture at the Institute of Physics and Astronomy, University of Aarhus, 30 November 1994
+deterministic effects is practically zero.
+Stochastic effects
+The outcome is very different if the irradiated cell is modified rather than killed. Despite highly
+effective biological defence mechanisms, the cloning of cells resulting from the reproduction of a
+modified but viable somatic cell may result, after a prolonged and variable time termed latency
+period, in the manifestation of a malignant condition, a somatic cancer.
+The probability of a somatic carcinogenesis resulting from radiation is assumed to increase
+with increments of dose, probably with no threshold of dose below which the probability is zero,
+and in a way that is roughly proportional to dose, at least for doses well below the thresholds for
+deterministic effects. The severity of the cancer does not depend on the level of dose.
+If the damage occurs in a cell whose function is to transmit genetic information to later
+generations, any resulting effects, which may be of many different kinds and severities, will
+presumably be expressed in the progeny of the exposed person as a hereditary effect. Somatic
+carcinogenesis and hereditary effects are termed stochastic effects.
+Whole body dose, H (Sv)
+Probability of death, p(H) (1/Sv)
+cancer
+hereditary effects
+0.01
+0.25
+0.5
+0
+0
+0.02
+Figure 3. Dose response for stochastic somatic and genetic effects as a function of equivalent
+whole body dose3.
+According to the current radiobiological theory, the process leading to a stochastic effect can
+originate at any dose level, however small, the probability of occurrence of an effect being
+proportional to the incurred dose. This model is termed the linear, no threshold dose-response
+relation. The dose response for stochastic effects is shown at Figure 3 as a function of effective
+dose.
+3 The unit of the equivalent dose is the sievert (Sv). 1 Sv = 1 J kg-1. The relation between the
+absorbed dose, D, and the equivalent dose, H, is H = wR D. The radiation weighting factor, wR,
+accounts for the different effectiveness of cancer induction per unit absorbed dose of different
+radiation types (α-, β-, γ- and n-radiation) (see Appendix).
+6
+
+========== PAGE 8 ==========
+
+Lecture at the Institute of Physics and Astronomy, University of Aarhus, 30 November 1994
+Studies of the survivors of the atomic bombings in Japan in 1945 are the most valuable
+source of information. Since 1947, the Radiation Effects Research Foundation (RERF), jointly
+funded by the governments of Japan and the USA, has closely monitored the medical health
+patterns of over 100,000 people who received relatively high doses of whole body radiation. Other
+large population study groups include some 200,000 persons who received high doses of radiation
+to specific parts of the body.
+Although lifetime data for these groups are incomplete, data from the follow-up period are
+extensive. In the case of the survivors of the atomic bombings, it is well into its fifth decade. Study
+findings for these survivors show a statistically significant increase in the frequency of death due
+to leukaemia as well as to many solid cancers. In total, they show that in addition to the around
+20,000 of that population would have been expected to incur cancer from ’natural’ causes, around
+1,000 incurred cancer that would have been due to doses received as a result of the bombing.
+Recently, the United Nations Scientific Committee on the Effects of Atomic Radiation (UNSCEAR)
+has updated the risk factors for radiation induced cancer due to a revised dosimetry for the
+survivors of Hiroshima and Nagasaki, the extended observation period and methodological
+advances in accounting for different causes of mortality.
+Genetic and cytogenetic studies of the nearly 15,000 children born to the atomic bombing
+survivors in Japan have so far yielded no evidence of a statistically significant increase in severe
+hereditary defects. UNSCEAR has therefore used two largely independent methods (the doubling
+dose and the direct method) to estimate the risks to humans of severe hereditary disorders due to
+radiation induced gene or chromosomal mutations. The latest risk estimates from UNSCEAR on
+genetic and somatic effects are shown in Table 1.
+Table 1. Summary of estimates of probability of stochastic effects of low radiation doses given
+at low dose rates.
+Effect
+Population
+Probability
+Fatal cancers (total)
+Workers (18-70 years)
+4 10-5 mSv-1
+Fatal cancers (total)
+General population
+5 10-5 mSv-1
+Severe hereditary effects
+First two generations
+1 10-6 mSv-1
+Severe hereditary effects
+All generations
+5 10-6 mSv-1
+5
+The International Chernobyl Project
+In October 1989, the Government of the USSR formally requested the International Atomic Energy
+Agency (IAEA) under the United Nations to carry out:
+".... an international experts’ assessment of the concept which the USSR has evolved to
+enable the population to live safely in areas affected by radioactive contamination
+following the Chernobyl accident, and an evaluation of the effectiveness of the steps taken
+in these areas to safeguard the health of the population."
+The response from the IAEA was a proposal for a multinational team to undertake an assessment
+of the radiological situation in the three affected Soviet Republics - the Ukrainian Soviet Socialist
+Republic (UkrSSR), the Byelorussian Soviet Socialist Republic (BSSR) and the Russian Federated
+7
+
+========== PAGE 9 ==========
+
+Lecture at the Institute of Physics and Astronomy, University of Aarhus, 30 November 1994
+Socialist Republic (RSFSR).
+The International Chernobyl Project was thus arranged, with the participation of the
+Commission of the European Communities (CEC), the Food and Agriculture Organisation of the
+United Nations (FAO), the International Labour Office (ILO), the United Nations Scientific
+Committee on the Effects of Atomic Radiation (UNSCEAR), the World Health Organisation
+(WHO) and the World Meteorological Organisation (WMO). The Project was formalized at a
+February 1990 meeting in Moscow at the headquarters of the USSR State Committee on the
+Utilization of Atomic Energy.
+Following a fact finding mission through the affected Republics over the period 25-30
+March 1990, an International Advisory Committee of scientists from ten countries and seven
+international organizations was established to direct the Project and be responsible for its findings.
+Members were called together by international orginasations participating in the Project from well
+known institutes and universities to represent a spectrum of disciplines, from the radiation specialist
+to the medical practitioner and the psychologist. This twenty-one member Committee met in Kiev
+and Minsk from 23 to 27 April 1990 under the chairmanship of Dr. Itsuzo Shigematsu, Director
+of the Radiation Effects Research Foundation (RERF) in Hiroshima, Japan. The Committee agreed
+upon a detailed work plan. This would be constrained by a compelling need to complete the Project
+in one year and by the limitation on the resources available. The Committee would need to rely
+on the availability of specialized professionals who would volunteer their time.
+The International Chernobyl Project was not intended to have the rigour and comprehensi-
+veness of an elaborate long term research study. The intention was to have a multidisciplinary
+group of international experts critically examine the extensive information, address the key issues
+and put together an understandable picture of the current situation. The goals of the Project, in
+short, were to examine assessments of the radiological and health situation in areas of the USSR
+affected by the Chernobyl accident and to evaluate measures to protect the population.
+The work plan adopted called for examining the validity of the official methodologies and
+findings, and independently verifying them through field samples, laboratory analyses and
+internationally recognized calculational techniques. The work covered five areas or ’tasks’:
+Task 1:
+Compilation of a historical portrayal of events leading to the current radiologi-
+cal situation
+Task 2:
+Evaluation of the environmental contamination assessments
+Task 3:
+Evaluation of the radiation exposure assessments
+Task 4:
+Assessments of clinical health effects from radiation exposure and evaluation
+of the general health situation
+Task 5:
+Evaluation of protective measures
+The Project selected, in co-operation with local authorities, a number of settlements in the
+contaminated areas of concern in order to perform the necessary surveys. Settlements were also
+selected outside the contaminated areas of concern to serve as references for comparative purposes.
+The Project was carried out on a completely voluntary basis by a closely co-operating team
+of some 200 experts associated with research institutes, universities and other organizations in 25
+countries and 7 multinational organizations. The time devoted to the Project was volunteered by
+governments, institutes, companies or the experts themselves. Nearly 50 missions to the USSR were
+completed between March 1990 and January 1991. The IAEA Laboratory at Seibersdorf along with
+13 laboratories in six countries participating on a voluntary basis were involved in the collection
+8
+
+========== PAGE 10 ==========
+
+Lecture at the Institute of Physics and Astronomy, University of Aarhus, 30 November 1994
+and analysis of samples.
+The Project received the full support of the USSR Government and the Governments of
+the BSSR, RSFSR and UkrSSR. Assistance took various forms, including the participation of local
+scientists in intercomparison exercises, extensive discussions with Project scientists, and assistance
+in the collection and preparation of field samples and in carrying out medical examinations of the
+population in the affected areas. There were open and frank conversations with authorities,
+scientists and especially local citizens that greatly helped the international experts’ understanding
+of the situation.
+6
+Consequences of the accident within the USSR
+The Chernobyl accident involved the largest short term release from a single source of radioactive
+materials to the atmosphere ever recorded. Aerial radiation measurements and environmental
+sampling began shortly after the accident and showed that the highest level of environmental
+contamination was in the area around the reactor that would eventually become the prohibited zone.
+Radiation doses in the early stages of the accident
+Several groups of people had been exposed to radiation at the Chernobyl power station to such an
+extent that resulting whole body doses produced various forms of acute radiation syndrome. The
+groups included operating personnel of the reactor and electricity generating plant, emergency
+squads and to the largest extent the fire brigades fighting the extensive early fires on the site. Acute
+radiation syndrome of varying clinical severity was diagnosed in 237 persons, mostly due to
+external irradiation with gamma and beta radiation. The estimated whole body doses ranged from
+about 2 Gy up to 16 Gy. In total, 28 persons died from acute bone marrow failure and of the
+gastro-intestinal syndrome.
+In the first weeks after the accident, the significant radiation exposure to the population was
+due to the radionuclide 131I. This could have been inhaled from the plume, though that represented
+only a minor pathway for population exposure. More important were the drinking of milk from
+cows grazing on contaminated pastures and the consumption of contaminated leafy vegetables. The
+average absorbed thyroid dose to non-evacuated children were officially reported to be around 2
+Gy, with maximum doses up to 30-40 Gy. The distribution of the collective absorbed thyroid doses
+as officially reported by the Institute of Biophysics in Moscow are shown in Table 2. The collective
+dose for an exposed population is the sum of all individual doses in the population.
+Table 2. Collective absorbed thyroid doses in the three affected Republics.
+Republic
+Collective dose (man Gy)
+Number of people
+Russia
+30 103
+705 103
+Ukraine
+245 103
+1,277 103
+Belarus
+561 103
+466 103
+Total
+836 103
+2,448 103
+The 115,000 people who were evacuated from the 30 km zone in the early stage of the accident
+from 28 April to 6 May did receive relatively high levels of whole body dose, although no one
+developed deterministic effects. Whole body doses were in most cases less than 250 mSv but doses
+up to 300-400 mSv did occur. The total collective dose to the evacuated people from the 30 km
+9
+
+========== PAGE 11 ==========
+
+Lecture at the Institute of Physics and Astronomy, University of Aarhus, 30 November 1994
+zone has been estimated to 16,000 man Sv.
+At the beginning of the clean up work on the site, most of the workers called in did not
+have personal dosimeters. These workers, also called ’liquidators’, were monitored on a group or
+area basis, with judgement providing a basis for deciding how much time an individual could spend
+on a given task or in a given area. In total, 600,000 workers - many from military and Civil
+Defence - had to be brought in to ensure that no one would exceed the dose limit for emergency
+workers of 250 mSv used in the USSR at that time. However, about 10% received higher doses
+in the first days of the accident. It is estimated that the collective whole body dose to the
+’liquidators’ is about 60,000 man Sv, corresponding to an average individual dose of 100 mSv.
+Radiation doses in the later stages of the accident
+Heavy rainfalls combined with local conditions to create ’hot spots’ of exceptionally high surface
+radioactivity levels. Information from continuing aerial surveys and environmental sampling has
+been used to derive official surface contamination maps which displays the ranges of concentration
+of caesium, strontium and plutonium. Officially published in 1989, the maps have stirred
+controversy among scientists and residents. About 25,000 km2 and 2,225 settlements in the three
+Republics are officially defined as having surface contamination density in excess of 185 kBq m-2
+(5 Ci km-2).
+The external exposure due to deposited radionuclides is, in most areas, the most significant
+contributor to dose, especially in those areas where food restrictions have been applied. Project
+estimates of doses were made for the surveyed contaminated settlements on the basis of average
+deposition results. It could not be assumed that such generalized dose estimation assumptions or
+environmental modelling calculations would accurately reflect the local soil conditions, agricultural
+practices and living habits in the surveyed contaminated settlements but the results could be
+expected to provide a general basis for comparison.
+Independent Project estimates for the surveyed contaminated settlements were lower than
+the official reported dose estimates. Overall, there is agreement to within a factor of 2-3 between
+the independent estimates and the officially reported estimates as shown in Table 3.
+Table 3. Individual lifetime effective dose estimates (1986 - 2056) by the International
+Chernobyl Project compared to official USSR lifetime dose estimates.
+Exposure pathway
+Project estimate
+Official estimate
+External exposure
+60-130 mSv
+80-160 mSv
+Internal exposure
+20-30 mSv
+60-230 mSv
+Total
+80-160 mSv
+150-400 mSv
+The collective dose commitment within the affected Republics in the former USSR has been
+estimated to be 216,000 man Sv. The distribution of the collective dose on different radionuclides
+is shown in Table 4.
+10
+
+========== PAGE 12 ==========
+
+Lecture at the Institute of Physics and Astronomy, University of Aarhus, 30 November 1994
+Table 4. Collective effective dose commitment within the former USSR from the Chernobyl
+accident distributed on radionuclides.
+Radionuclide
+Collective dose commitment (man Sv)
+137Cs
+155,000
+134Cs
+43,000
+131I
+13,000
+Short-lived
+5,000
+Total
+216,000
+The collective lifetime dose to the population of around 700,000 people living in the most
+contaminated areas, i.e. in areas with a surface contamination density with 137Cs greater than 185
+kBq m-2 have been estimated to be 54,000 man Sv which is about 25% of the total collective
+dose.
+The average lifetime dose to this population group is thus of the order of 100 mSv. With
+the risk factors given in Table 1 this lifetime dose would correspond to a lifetime risk of fatal
+cancer of the order of 0.005. For comparison, the lifetime risk of fatal cancer in a society from all
+causes is around 0.2. Also for comparison, the individual lifetime dose from natural occurring
+radiation is 150-200 mSv.
+Health impact within the USSR
+The suspected health impact of the Chernobyl accident has unquestionably been of overriding
+concern among the population. There had been continuing reports of a higher incidence of illness
+among those residing in the affected areas. Within the International Chernobyl Project a number
+of settlements were selected for the medical task force. These settlements were chosen to be
+representative of the various communities in the study region. The surveyed control settlements had
+socio-economic structures similar to the seven surveyed contaminated settlements. The aim was to
+examine various age groups of 20 people each, which, depending on the size of the settlement,
+represented between 10 and 80 per cent of the population. Approximately, 250 people were
+examined in each settlement. In all, 1356 people were examined.
+There were significant non-radiation-related health disorders in the populations of both
+surveyed contaminated and surveyed control settlements studied under the Project, but no health
+disorders that could be attributed directly to radiation exposure. The accident had substantial
+negative psychological consequences in terms of anxiety and stress due to the continuing and high
+levels of uncertainty, the occurrence of which extended beyond the contaminated areas of concern.
+The children who were examined were found to be generally healthy. Field studies
+indicated that there were a significant number of adults in both surveyed contaminated and
+surveyed control settlements with substantial medical problems, with 10-15% requiring medical
+care.
+Reported adverse health effects attributed to radiation have not been substantiated either
+by those local studies which were adequately performed or by the studies under the Project.
+Available data reviewed did not provide an adequate basis for determining whether there has been
+an increase in leukaemia or thyroid cancers as a consequence of the accident. The data were not
+detailed enough to exclude the possibility of an increase in the incidence of some tumour types.
+On the basis of the radiation doses estimated by the Project and currently accepted radiation risk
+estimates, future increases over the natural incidence of all cancers or hereditary effects would be
+difficult to discern, even with large and well designed epidemiological studies. Reported estimates
+11
+
+========== PAGE 13 ==========
+
+Lecture at the Institute of Physics and Astronomy, University of Aarhus, 30 November 1994
+of absorbed thyroid dose in children are such that there may be a statistically detectable increase
+in the incidence of thyroid tumours in the future.
+7
+Consequences outside the USSR
+Although populations were exposed in the countries of Europe and, to a lesser extent, in countries
+throughout the Northern hemisphere, the radiation exposures were, in perspective, not of great
+magnitude. In Denmark, the first-year dose was approximately 0.02 mSv. For reference, the average
+annual effective dose from natural sources is 2.4 mSv. The first-year doses in different European
+countries are shown at Figure 4.
+First-year effective dose (mSv)
+0
+0.8
+0.6
+0.4
+0.2
+1.0
+Bulgaria
+Austria
+Greece
+Romania
+Finland
+Yoguslavia
+Czechoslovakia
+Italy
+Switzerland
+Poland
+USSR
+Hungary
+Norway
+German Democratic Republic
+Turkey
+Sweden
+Germany, Federal Republic of
+Ireland
+Luxembourg
+Israel
+Cyprus
+France
+Netherlands
+Belgium
+DENMARK
+United Kingdom
+Syrian Arab Republic
+China
+Japan
+Spain
+India
+Portugal
+USA
+Canada
+Figure 4. Maximum individual effective doses in different European countries in 1986.
+At the time of the accident, surface winds were light and variable, but at 1,500 m altitude the winds
+were 8-10 m s-1 from the south. At Risø National Laboratory an ionization chamber was measuring
+the outdoor exposure rate as part of a research project. When the data from the measurement series
+was read at 28 April, the arrival of the plume at Risø on 27 April was revealed. The ionization
+chamber continued to measure the increased radiation level above the natural background. On 7
+May, heavy rain washed out the radioactive materials still present in the air over Risø. The
+ionization chamber reading for the period 23 April - 23 June 1986 is shown at Figure 5.
+12
+
+========== PAGE 14 ==========
+
+Lecture at the Institute of Physics and Astronomy, University of Aarhus, 30 November 1994
+Days after 22 April 1986
+0
+10
+20
+30
+40
+50
+60
+Exposure rate (µR/h)
+0
+5
+10
+15
+Arrival of plume 27 April
+Heavy rain 7 May
+Radon daughters
+Average background exposure rate
+Figure 5. High pressure ionization chamber reading of the outdoor exposure rate at Risø
+National Laboratory in the period 23 April - 23 June 1986.
+Exposures, mainly from 137Cs, will continue for a few tens of years from the external irradiation
+and ingestion pathways. Estimates of dose commitments have been made by UNSCEAR for larger
+geographical regions, based on projection models developed from fallout measurements experience.
+From the 137Cs deposition versus distance relationship, dose estimates for the entire Northern
+hemisphere have been obtained. The estimated collective effective dose commitment from the
+accident are shown in Table 5.
+Table 5. Collective effective dose commitment outside the former USSR from the Chernobyl
+accident distributed on areas.
+Area outside the USSR
+Collective dose commitment (man Sv)
+Europe
+318,000
+Asia
+48,000
+Rest of world
+18,000
+Total
+384,000
+The collective dose commitment for Europe of 318,000 man Sv is calculated for a population of
+487 million people. The average individual dose commitment can thus be calculated to be around
+0.7 mSv, varying between 0.2 and 1 mSv. For comparison, the individual dose commitment from
+natural sources would be of the order of 200 mSv.
+13
+
+========== PAGE 15 ==========
+
+Lecture at the Institute of Physics and Astronomy, University of Aarhus, 30 November 1994
+8
+Conclusions
+The accident at Chernobyl had a societal impact unparalleled in industrial history. The early
+consequences resulted in the evacuation of more than 100,000 people and involved hundreds of
+thousands of rescue workers. Vast populations in the Republics of Belarus, Ukraine and Russia
+continue to live with stress and anxiety due to the lingering uncertainty about the future.
+The unprecedented nature and scale of the accident obliged the responsible authorities to
+respond to a situation that had not been planned for and was not expected. Thus, many early
+actions had to be improvised. The general response of the authorities in this phase seems to be
+reasonable and consistent with internationally established guidelines prevailing at the time of the
+accident.
+The protective measures taken or planned for the longer term, albeit well intentioned,
+generally exceeded what would have been strictly necessary from a radiation protection viewpoint.
+The relocation and foodstuff restrictions should have been less extensive. It should be recognized,
+however, that there are many social and political factors to be taken into consideration, and the
+final decision must rest with the responsible authorities.
+There are many important psychological problems of anxiety and stress related to the
+accident and these seems to be wholly disproportionate to the biological significance of the
+radioactive contamination. These problems are prevalent even in non-contaminated areas. Review
+of USSR data indicates that reported cancer incidence rate has been rising since the early eighties
+and has continued to rise since the accident. The International Chernobyl Project considered that
+there had been incomplete reporting in the past and could not assess whether the rise is due to
+increased incidence, methodological differences, better detection and diagnosis or other causes.
+The thyroid doses to children are such that there may be a statistically detectable increase
+in the incidence of thyroid tumours in the future. In fact, there are now indications of thyroid
+cancers in children induced by the exposure to iodine released from the accident. The type of
+thyroid cancer is one which would be expected from radiation exposure. On the basis of the
+radiation doses from the accident and currently accepted radiation risk estimates, future increases
+over the natural incidence of all cancers or hereditary effects would be difficult to discern, even
+with large and well designed epidemiological studies. Reported estimates of absorbed thyroid dose
+in children are such that there may be a statistically detectable increase in the incidence of thyroid
+tumours in the future.
+14
+
+========== PAGE 16 ==========
+
+Lecture at the Institute of Physics and Astronomy, University of Aarhus, 30 November 1994
+9
+References
+1.
+The International Chernobyl Project. Assessment of Radiological Consequences and
+Evaluation of Protective Measures. Technical Report. Report by an International Advisory
+Committee. IAEA, Vienna 1991. ISBN 92-0-129191-4.
+2.
+The International Chernobyl Project. Assessment of Radiological Consequences and
+Evaluation of Protective Measures. An Overview. Report by an International Advisory
+Committee. IAEA, Vienna 1991. ISBN 92-0-129091-8.
+3.
+The International Chernobyl Project. Surface Contamination Maps. IAEA, Vienna 1991.
+ISBN 92-0-129291-0.
+4.
+The International Chernobyl Project. Proceedings of an International Conference. IAEA,
+Vienna 1991. ISBN 92-0-129391-7.
+5.
+Per Hedemann Jensen, Grundlæggende helsefysiske begreber og principper. Forsknings-
+center Risø. Risø-R-646(DA), 1992.
+15
+
+========== PAGE 17 ==========
+
+Lecture at the Institute of Physics and Astronomy, University of Aarhus, 30 November 1994
+Appendix
+Radiation dose quantities and units
+A1
+Absorbed dose
+As radiation penetrates any material, its energy is absorbed and released by the constituent atoms.
+The absorbed radiation energy per unit mass of material is termed the absorbed dose, D. The SI
+unit is the gray (Gy), one gray being equal to one joule energy absorbed per kilogram of matter.
+The effects of radiation on any material, including biological material such as tissue, depend on
+the magnitude of the absorbed dose. The absorbed dose can be defined in terms of the related
+stochastic quantity energy imparted, ε. The energy imparted by ionizing radiation to matter of mass,
+m, in a finite volume, V, is defined as:
+where (Rin)u and (Rout)u are the radiant energies (particle energy excluding rest energy) of uncharged
+particles entering and leaving V, (Rin)c and (Rout)c are the radiant energies of charged particles
+entering and leaving V, and ΣQ is the net energy derived from rest mass in V (m→E positive,
+E→m negative). The absorbed dose, D, is defined at any point P in V as:
+where ε is now the expectation value of the energy imparted in the finite volume V, dε is that for
+an infinitesimal volume dV at point P, and dm is the mass in dV. Thus the absorbed dose D is the
+expectation value of the energy imparted to matter per unit mass at a point.
+A2
+Radiation weighting factor
+Radiation effects, including harm to tissue, are found to depend not only on the absorbed dose, but
+also on the type and energy of the radiation causing the dose. For radiation protection purposes,
+these factors are taken into account by weighting the absorbed dose in tissue by a factor related
+to the relative biological effectiveness of the radiation of causing cancer. The weighting factor for
+this purpose is termed the radiation weighting factor, wR, and it reflects both radiation type and
+energy. Radiation weighting factors are shown in Table A1.
+16
+
+========== PAGE 18 ==========
+
+Lecture at the Institute of Physics and Astronomy, University of Aarhus, 30 November 1994
+Table A1. Radiation weighting factors, wR, for different radiation types.
+Radiation type
+Radiation weighting factor, wR
+Photons, all energies
+Electrons and muons, all energies
+Alpha particles
+Neutrons, depending on energy
+1
+1
+20
+5 - 20
+A3
+Equivalent dose
+The absorbed dose weighted by the radiation weighting factors is termed the equivalent dose, H,
+in a tissue or organ, T, is given by the expression:
+where DT,R is the mean absorbed dose in tissue or organ T due to radiation type R. The unit of
+equivalent dose is the sievert (Sv), where 1 Sv = 1 J kg-1. Equivalent doses are additive regarding
+the radiation risk of stochastic effects. The equivalent dose is relevant only for doses in the low
+dose region below the threshold doses for deterministic effects.
+17
