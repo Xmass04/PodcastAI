@@ -307,17 +307,10 @@ def start_job(job_id: str) -> int:
 
     worker_executable = Path(sys.executable)
 
-    if os.name == "nt":
-        pythonw_candidate = worker_executable.with_name(
-            "pythonw.exe"
-        )
-
-        if pythonw_candidate.exists():
-            worker_executable = pythonw_candidate
-
     command = [
         str(worker_executable),
-        str(WORKER_PATH),
+        "-m",
+        "backend.worker",
         job_id,
     ]
 
@@ -325,12 +318,19 @@ def start_job(job_id: str) -> int:
     environment["PYTHONIOENCODING"] = "utf-8"
     environment["PYTHONUTF8"] = "1"
 
+    bootstrap_log_path = job_folder(job_id) / "worker_bootstrap.log"
+
+    bootstrap_log = bootstrap_log_path.open(
+        "a",
+        encoding="utf-8",
+    )
+
     popen_arguments: dict[str, Any] = {
         "cwd": PROJECT_ROOT,
         "env": environment,
         "stdin": subprocess.DEVNULL,
-        "stdout": subprocess.DEVNULL,
-        "stderr": subprocess.DEVNULL,
+        "stdout": bootstrap_log,
+        "stderr": subprocess.STDOUT,
         "close_fds": True,
     }
 
@@ -340,16 +340,17 @@ def start_job(job_id: str) -> int:
         startup_info.wShowWindow = subprocess.SW_HIDE
 
         popen_arguments["startupinfo"] = startup_info
-        popen_arguments["creationflags"] = (
-            subprocess.CREATE_NO_WINDOW
-        )
+        popen_arguments["creationflags"] = subprocess.CREATE_NO_WINDOW
     else:
         popen_arguments["start_new_session"] = True
 
-    process = subprocess.Popen(
-        command,
-        **popen_arguments,
-    )
+    try:
+        process = subprocess.Popen(
+            command,
+            **popen_arguments,
+        )
+    finally:
+        bootstrap_log.close()
 
     job["worker_pid"] = process.pid
     job["message"] = "Worker starting"

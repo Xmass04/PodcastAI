@@ -1,26 +1,26 @@
 {
-  "document_title": "2 B R 0 2 B",
-  "document_mode": "story",
-  "document_type": "Short Story",
-  "confidence": 99,
-  "topics_or_chapters_found": 1,
+  "document_title": "Mutation and Types of Mutation",
+  "document_mode": "study",
+  "document_type": "Lecture Slides",
+  "confidence": 96,
+  "topics_or_chapters_found": 7,
   "difficulty": "Medium",
-  "estimated_reading_minutes": 12,
+  "estimated_reading_minutes": 3,
   "estimated_learning_minutes": 20,
-  "recommended_pack": "Story Pack",
+  "recommended_pack": "Study Pack",
   "recommended_outputs": [
-    "Narrated story version",
-    "Plot summary",
-    "Character overview",
-    "Theme analysis",
-    "Discussion questions",
-    "Key quotes"
+    "Tutor-style audio explanation",
+    "Concise study summary",
+    "Key terms glossary",
+    "Flashcards on mutation types and concepts",
+    "Quiz questions with answers",
+    "Revision notes organized by slide topics"
   ],
-  "audio_style": "Story Narration",
-  "reason": "The document is a complete fictional short story by Kurt Vonnegut, with narrative prose, characters, dialogue, and a clear ending. It is best suited to a story-focused listening experience.",
+  "audio_style": "Tutor Conversation",
+  "reason": "The document is educational slide content explaining mutations, types of mutation, causes and effects, methods for studying DNA mutations, antibiotic resistance, therapeutic approaches and key findings. It is best suited to a study experience.",
   "warnings": [
-    "Page 1 contains no selectable text.",
-    "The document includes death, suicide, euthanasia, and violence."
+    "Some slide text appears truncated or affected by formatting/OCR issues, especially on page 3.",
+    "The document is brief and slide-based, so explanations may need to be expanded for effective learning."
   ],
   "user_overrode_mode": false
 }

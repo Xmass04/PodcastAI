@@ -12,30 +12,21 @@ from typing import Any
 import streamlit as st
 
 
-BACKEND_IMPORT_FOLDER = Path(__file__).resolve().parent.parent / "backend"
-
-if str(BACKEND_IMPORT_FOLDER) not in sys.path:
-    sys.path.insert(0, str(BACKEND_IMPORT_FOLDER))
-
-from diagnostics import (
-    load_latest_report,
-    record_python_exception,
-    record_subprocess_result,
-    utc_now,
-    wait_before_retry,
-)
-
-
-from cache_manager import (
+from backend.cache_manager import (
     build_cache_key,
     cache_exists,
     calculate_file_hash,
     restore_cache,
     save_cache,
 )
-
-
-from job_manager import (
+from backend.diagnostics import (
+    load_latest_report,
+    record_python_exception,
+    record_subprocess_result,
+    utc_now,
+    wait_before_retry,
+)
+from backend.job_manager import (
     create_and_start_job,
     is_finished,
     read_job,

@@ -1,11 +1,11 @@
 {
-  "run_id": "20260715_221552_1d1e411a",
-  "stage": "Podcast audio",
-  "script_name": "podcast_audio.py",
+  "run_id": "20260716_020519_355126fc",
+  "stage": "Quiz",
+  "script_name": "quiz_generator.py",
   "status": "success",
-  "started_at": "2026-07-15T22:11:35.974222+00:00",
-  "finished_at": "2026-07-15T22:15:52.350979+00:00",
-  "duration_seconds": 256.377,
+  "started_at": "2026-07-16T02:05:05.236555+00:00",
+  "finished_at": "2026-07-16T02:05:19.045337+00:00",
+  "duration_seconds": 13.809,
   "return_code": 0,
   "attempt": 1,
   "error_type": null,
@@ -16,12 +16,12 @@
   "likely_cause": null,
   "suggested_fix": null,
   "retryable": false,
-  "stdout": "Detected 105 spoken turns for story mode.\nRecording 1/105 - Narrator\nRecording 2/105 - Narrator\nRecording 3/105 - Narrator\nRecording 4/105 - Narrator\nRecording 5/105 - Narrator\nRecording 6/105 - Narrator\nRecording 7/105 - Narrator\nRecording 8/105 - Narrator\nRecording 9/105 - Narrator\nRecording 10/105 - Narrator\nRecording 11/105 - Narrator\nRecording 12/105 - Narrator\nRecording 13/105 - Narrator\nRecording 14/105 - Narrator\nRecording 15/105 - Narrator\nRecording 16/105 - Narrator\nRecording 17/105 - Narrator\nRecording 18/105 - Narrator\nRecording 19/105 - Narrator\nRecording 20/105 - Narrator\nRecording 21/105 - Narrator\nRecording 22/105 - Narrator\nRecording 23/105 - Narrator\nRecording 24/105 - Narrator\nRecording 25/105 - Narrator\nRecording 26/105 - Narrator\nRecording 27/105 - Narrator\nRecording 28/105 - Narrator\nRecording 29/105 - Narrator\nRecording 30/105 - Narrator\nRecording 31/105 - Narrator\nRecording 32/105 - Narrator\nRecording 33/105 - Narrator\nRecording 34/105 - Narrator\nRecording 35/105 - Narrator\nRecording 36/105 - Narrator\nRecording 37/105 - Narrator\nRecording 38/105 - Narrator\nRecording 39/105 - Narrator\nRecording 40/105 - Narrator\nRecording 41/105 - Narrator\nRecording 42/105 - Narrator\nRecording 43/105 - Narrator\nRecording 44/105 - Narrator\nRecording 45/105 - Narrator\nRecording 46/105 - Narrator\nRecording 47/105 - Narrator\nRecording 48/105 - Narrator\nRecording 49/105 - Narrator\nRecording 50/105 - Narrator\nRecording 51/105 - Narrator\nRecording 52/105 - Narrator\nRecording 53/105 - Narrator\nRecording 54/105 - Narrator\nRecording 55/105 - Narrator\nRecording 56/105 - Narrator\nRecording 57/105 - Narrator\nRecording 58/105 - Narrator\nRecording 59/105 - Narrator\nRecording 60/105 - Narrator\nRecording 61/105 - Narrator\nRecording 62/105 - Narrator\nRecording 63/105 - Narrator\nRecording 64/105 - Narrator\nRecording 65/105 - Narrator\nRecording 66/105 - Narrator\nRecording 67/105 - Narrator\nRecording 68/105 - Narrator\nRecording 69/105 - Narrator\nRecording 70/105 - Narrator\nRecording 71/105 - Narrator\nRecording 72/105 - Narrator\nRecording 73/105 - Narrator\nRecording 74/105 - Narrator\nRecording 75/105 - Narrator\nRecording 76/105 - Narrator\nRecording 77/105 - Narrator\nRecording 78/105 - Narrator\nRecording 79/105 - Narrator\nRecording 80/105 - Narrator\nRecording 81/105 - Narrator\nRecording 82/105 - Narrator\nRecording 83/105 - Narrator\nRecording 84/105 - Narrator\nRecording 85/105 - Narrator\nRecording 86/105 - Narrator\nRecording 87/105 - Narrator\nRecording 88/105 - Narrator\nRecording 89/105 - Narrator\nRecording 90/105 - Narrator\nRecording 91/105 - Narrator\nRecording 92/105 - Narrator\nRecording 93/105 - Narrator\nRecording 94/105 - Narrator\nRecording 95/105 - Narrator\nRecording 96/105 - Narrator\nRecording 97/105 - Narrator\nRecording 98/105 - Narrator\nRecording 99/105 - Narrator\nRecording 100/105 - Narrator\nRecording 101/105 - Narrator\nRecording 102/105 - Narrator\nRecording 103/105 - Narrator\nRecording 104/105 - Narrator\nRecording 105/105 - Narrator\n\nCombining generated audio...\n\nSUCCESS: Audio created!\nSaved to: C:\\Users\\jackb\\OneDrive\\Desktop\\podcastAI\\data\\podcasts\\audio\\podcast_episode.wav\nDisclosure: This audio uses AI-generated voices.",
+  "stdout": "Using structured study notes.\nGenerating quiz...\n\n✅ Quiz created successfully!\nCreated: 20 questions\nSaved to: C:\\Users\\jackb\\OneDrive\\Desktop\\podcastAI\\data\\quizzes\\quiz.json",
   "stderr": "",
   "traceback_text": "",
   "metadata": {
-    "job_id": "20260715_220939_6b268ae63d",
-    "task_id": "task_3",
+    "job_id": "20260716_020330_2225829180",
+    "task_id": "task_5",
     "background_worker": true
   }
 }

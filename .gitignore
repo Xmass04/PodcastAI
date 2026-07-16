@@ -50,9 +50,15 @@ temp/
 data/uploads/
 data/extracted_text/
 data/podcasts/
+data/podcasts/audio/
 data/quizzes/
 data/summaries/
 data/translations/
 data/*.pdf
 data/flashcards/
-
+data/images/
+data/analysis/
+logs/
+data/
+.env
+data/cache/

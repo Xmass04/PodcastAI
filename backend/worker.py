@@ -358,7 +358,7 @@ def run_task_attempt(
             else subprocess.DEVNULL
         ),
         "stdout": subprocess.PIPE,
-        "stderr": subprocess.PIPE,
+        "stderr": subprocess.STDOUT,
         "text": True,
         "encoding": "utf-8",
         "errors": "replace",
@@ -423,12 +423,7 @@ def run_task_attempt(
                 "\n".join(
                     stdout_lines
                 ),
-                (
-                    "\n".join(
-                        stderr_lines
-                    )
-                    + "\nJob cancelled."
-                ).strip(),
+                "Job cancelled.",
                 130,
                 {
                     "cancelled": True,
@@ -436,86 +431,58 @@ def run_task_attempt(
                 },
             )
 
-        stdout_line = (
+        output_line = (
             process.stdout.readline()
             if process.stdout
             else ""
         )
 
-        if stdout_line:
+        if output_line:
+            clean_line = output_line.rstrip(
+                "\n"
+            )
+
             stdout_lines.append(
-                stdout_line.rstrip(
-                    "\n"
-                )
+                clean_line
             )
 
             append_worker_log(
                 job_id,
-                stdout_line,
+                output_line,
             )
 
             update_from_output_line(
                 job_id=job_id,
                 job=job,
                 task_index=task_index,
-                line=stdout_line,
+                line=output_line,
             )
 
-        stderr_line = (
-            process.stderr.readline()
-            if process.stderr
-            else ""
-        )
-
-        if stderr_line:
-            stderr_lines.append(
-                stderr_line.rstrip(
-                    "\n"
-                )
-            )
-
-            append_worker_log(
-                job_id,
-                stderr_line,
-            )
-
-            update_from_output_line(
-                job_id=job_id,
-                job=job,
-                task_index=task_index,
-                line=stderr_line,
-            )
-
-        if (
-            process.poll()
-            is not None
-        ):
+        if process.poll() is not None:
             if process.stdout:
-                remaining_stdout = (
-                    process.stdout.read()
-                )
+                remaining_output = process.stdout.read()
 
-                if remaining_stdout:
-                    stdout_lines.extend(
-                        remaining_stdout.splitlines()
-                    )
+                if remaining_output:
+                    for remaining_line in remaining_output.splitlines():
+                        stdout_lines.append(
+                            remaining_line
+                        )
 
-            if process.stderr:
-                remaining_stderr = (
-                    process.stderr.read()
-                )
+                        append_worker_log(
+                            job_id,
+                            remaining_line,
+                        )
 
-                if remaining_stderr:
-                    stderr_lines.extend(
-                        remaining_stderr.splitlines()
-                    )
+                        update_from_output_line(
+                            job_id=job_id,
+                            job=job,
+                            task_index=task_index,
+                            line=remaining_line,
+                        )
 
             break
 
-        if (
-            not stdout_line
-            and not stderr_line
-        ):
+        if not output_line:
             time.sleep(0.1)
 
     return_code = (
@@ -529,9 +496,8 @@ def run_task_attempt(
         stdout_lines
     )
 
-    stderr = "\n".join(
-        stderr_lines
-    )
+    # stderr is merged into stdout to prevent Windows pipe deadlocks.
+    stderr = ""
 
     finished_at = utc_now()
 
