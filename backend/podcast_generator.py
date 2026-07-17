@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import os
-import sys
 from pathlib import Path
 from typing import Any
 
@@ -21,34 +20,11 @@ OUTPUT_PATH = PROJECT_ROOT / "data" / "podcasts" / "podcast_script.txt"
 
 MODEL_NAME = "gpt-5.5"
 
-LENGTH_SETTINGS = {
-    "Quick": {
-        "description": "a focused 3 to 5 minute episode",
-        "max_output_tokens": 1600,
-        "target_turns": "10 to 18 substantial spoken turns",
-    },
-    "Standard": {
-        "description": "an engaging 8 to 12 minute episode",
-        "max_output_tokens": 2800,
-        "target_turns": "18 to 30 substantial spoken turns",
-    },
-    "Deep Dive": {
-        "description": "a detailed 15 to 20 minute episode",
-        "max_output_tokens": 4200,
-        "target_turns": "28 to 45 substantial spoken turns",
-    },
-}
-
 
 def read_text(path: Path) -> str | None:
     if not path.exists():
         return None
-
-    text = path.read_text(
-        encoding="utf-8",
-        errors="replace",
-    ).strip()
-
+    text = path.read_text(encoding="utf-8", errors="replace").strip()
     return text or None
 
 
@@ -64,57 +40,33 @@ def load_analysis() -> dict[str, Any]:
 
     try:
         return json.loads(
-            ANALYSIS_PATH.read_text(
-                encoding="utf-8",
-                errors="replace",
-            )
+            ANALYSIS_PATH.read_text(encoding="utf-8", errors="replace")
         )
     except (json.JSONDecodeError, OSError):
         return fallback
 
 
-def choose_source_text(
-    document_mode: str,
-) -> tuple[str, str]:
+def choose_source_text(document_mode: str) -> tuple[str, str]:
     if document_mode == "study":
         notes = read_text(STUDY_NOTES_PATH)
-
         if notes:
             return notes, "structured study notes"
 
-    if document_mode in {
-        "work",
-        "research",
-        "general",
-    }:
+    if document_mode in {"work", "research", "general"}:
         summary = read_text(SUMMARY_PATH)
-
         if summary:
             return summary, "summary"
 
     extracted = read_text(EXTRACTED_TEXT_PATH)
-
     if extracted:
         return extracted, "extracted document text"
 
     raise FileNotFoundError(
-        "No usable source text was found. "
-        "Upload and analyse a PDF or image first."
+        "No usable source text was found. Upload and analyse a PDF or image first."
     )
 
 
-def build_instructions(
-    document_mode: str,
-    target_turns: str,
-) -> str:
-    shared_rules = (
-        f"\n- Aim for {target_turns}.\n"
-        "- Each spoken turn should normally contain 2 to 5 complete sentences.\n"
-        "- Avoid one-sentence ping-pong dialogue.\n"
-        "- Keep the number of speaker changes low enough for efficient audio generation.\n"
-        "- Never finish mid-sentence.\n"
-    )
-
+def build_instructions(document_mode: str) -> str:
     if document_mode == "story":
         return (
             "You are a professional story-audio script writer.\n\n"
@@ -127,15 +79,16 @@ def build_instructions(
             "- Do not invent major plot events.\n"
             "- Do not reproduce a long copyrighted work word-for-word.\n"
             "- Retell and adapt the supplied material naturally.\n"
-            "- Use longer narration blocks rather than one short paragraph per label.\n"
+            "- Include a clear title and optional section headings.\n"
+            "- Make the narration vivid, smooth and suitable for listening.\n"
             "- End at a natural stopping point with a complete final sentence.\n"
-            + shared_rules
+            "- Never finish mid-sentence."
         )
 
     if document_mode == "work":
         return (
             "You are a professional workplace briefing writer.\n\n"
-            "Create a concise, useful audio briefing between Alex and Jamie.\n\n"
+            "Create a concise, useful audio briefing between two presenters.\n\n"
             "Alex explains responsibilities, risks, deadlines and key decisions.\n"
             "Jamie asks clarifying questions and highlights practical actions.\n\n"
             "Requirements:\n"
@@ -144,7 +97,7 @@ def build_instructions(
             "- Avoid exam language.\n"
             "- Use only information supported by the document.\n"
             "- End with a clear action recap and complete goodbye.\n"
-            + shared_rules
+            "- Never finish mid-sentence."
         )
 
     if document_mode == "research":
@@ -159,8 +112,7 @@ def build_instructions(
             "- Separate findings from interpretation.\n"
             "- Mention limitations only when supported by the source.\n"
             "- Do not invent statistics, claims or conclusions.\n"
-            "- Finish with a concise recap and complete closing.\n"
-            + shared_rules
+            "- Finish with a concise recap and complete closing."
         )
 
     if document_mode == "general":
@@ -173,8 +125,7 @@ def build_instructions(
             "- Jamie asks natural questions and simplifies difficult points.\n"
             "- Use only information supported by the document.\n"
             "- Organise the episode into a beginning, explanation and recap.\n"
-            "- End naturally with a complete final sentence.\n"
-            + shared_rules
+            "- End naturally with a complete final sentence."
         )
 
     return (
@@ -185,184 +136,68 @@ def build_instructions(
         "Requirements:\n"
         "- Every spoken turn must begin with 'Alex:' or 'Jamie:'.\n"
         "- Teach rather than simply reading the notes.\n"
-        "- Group related ideas into substantial turns.\n"
-        "- Jamie should ask grouped follow-up questions instead of interrupting "
-        "after every sentence.\n"
         "- Include an introduction, organised teaching sections, active-recall "
         "questions, a final recap and a friendly outro.\n"
         "- Use only information supported by the supplied material.\n"
         "- The ending must be complete and natural.\n"
-        + shared_rules
+        "- Never finish mid-sentence."
     )
 
 
-def generate_podcast_script(
-    source_text: str,
-    analysis: dict[str, Any],
-    podcast_length: str,
-) -> str:
+def generate_podcast_script(source_text: str, analysis: dict[str, Any]) -> str:
     load_dotenv(dotenv_path=ENV_PATH)
-
     api_key = os.getenv("OPENAI_API_KEY")
 
     if not api_key:
-        raise ValueError(
-            "OPENAI_API_KEY was not found."
-        )
+        raise ValueError("OPENAI_API_KEY was not found.")
 
-    settings = LENGTH_SETTINGS.get(
-        podcast_length,
-        LENGTH_SETTINGS["Standard"],
-    )
-
-    document_mode = str(
-        analysis.get(
-            "document_mode",
-            "study",
-        )
-    ).lower()
-
-    audio_style = str(
-        analysis.get(
-            "audio_style",
-            "Tutor Conversation",
-        )
-    )
-
-    document_title = str(
-        analysis.get(
-            "document_title",
-            "PodcastAI Episode",
-        )
-    )
+    document_mode = str(analysis.get("document_mode", "study")).lower()
+    audio_style = str(analysis.get("audio_style", "Tutor Conversation"))
+    document_title = str(analysis.get("document_title", "PodcastAI Episode"))
 
     client = OpenAI(api_key=api_key)
+    response = client.responses.create(
+        model=MODEL_NAME,
+        instructions=build_instructions(document_mode),
+        input=(
+            f"Document title: {document_title}\n"
+            f"Document mode: {document_mode}\n"
+            f"Requested audio style: {audio_style}\n\n"
+            "Create the complete audio script from the material below.\n\n"
+            f"MATERIAL:\n{source_text}"
+        ),
+        max_output_tokens=3500,
+    )
 
-    try:
-        response = client.responses.create(
-            model=MODEL_NAME,
-            instructions=build_instructions(
-                document_mode,
-                settings["target_turns"],
-            ),
-            input=(
-                f"Document title: {document_title}\n"
-                f"Document mode: {document_mode}\n"
-                f"Requested audio style: {audio_style}\n"
-                f"Requested length: {settings['description']}\n\n"
-                "Create the complete audio script from the material below.\n\n"
-                f"MATERIAL:\n{source_text}"
-            ),
-            max_output_tokens=settings[
-                "max_output_tokens"
-            ],
-        )
-
-        script = response.output_text.strip()
-
-    finally:
-        client.close()
-
+    script = response.output_text.strip()
     if not script:
-        raise RuntimeError(
-            "The AI returned an empty podcast script."
-        )
+        raise RuntimeError("The AI returned an empty podcast script.")
 
     return script
 
 
 def save_script(script: str) -> None:
-    OUTPUT_PATH.parent.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    OUTPUT_PATH.write_text(
-        script,
-        encoding="utf-8",
-    )
+    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    OUTPUT_PATH.write_text(script, encoding="utf-8")
 
 
 def main() -> None:
     try:
         analysis = load_analysis()
+        document_mode = str(analysis.get("document_mode", "study")).lower()
+        source_text, source_name = choose_source_text(document_mode)
 
-        document_mode = str(
-            analysis.get(
-                "document_mode",
-                "study",
-            )
-        ).lower()
+        print(f"Generating {document_mode} audio script from {source_name}...")
 
-        podcast_length = os.getenv(
-            "PODCASTAI_PODCAST_LENGTH",
-            "Standard",
-        )
-
-        source_text, source_name = (
-            choose_source_text(
-                document_mode
-            )
-        )
-
-        print(
-            f"PROGRESS|5|Generating {podcast_length} "
-            f"{document_mode} audio script...",
-            flush=True,
-        )
-
-        print(
-            f"Generating {document_mode} audio script "
-            f"from {source_name}...",
-            flush=True,
-        )
-
-        script = generate_podcast_script(
-            source_text,
-            analysis,
-            podcast_length,
-        )
-
-        print(
-            "PROGRESS|90|Saving podcast script...",
-            flush=True,
-        )
-
+        script = generate_podcast_script(source_text, analysis)
         save_script(script)
 
-        print(
-            "\nSUCCESS: Podcast script created!",
-            flush=True,
-        )
-
-        print(
-            f"Mode: {document_mode}",
-            flush=True,
-        )
-
-        print(
-            f"Length: {podcast_length}",
-            flush=True,
-        )
-
-        print(
-            f"Saved to: {OUTPUT_PATH}",
-            flush=True,
-        )
-
-        print(
-            "PROGRESS|100|Podcast script ready",
-            flush=True,
-        )
+        print("\nSUCCESS: Podcast script created!")
+        print(f"Mode: {document_mode}")
+        print(f"Saved to: {OUTPUT_PATH}")
 
     except Exception as error:
-        print(
-            "\nERROR: Podcast script generation "
-            f"failed: {error}",
-            flush=True,
-        )
-
-        raise SystemExit(1)
+        print(f"\nERROR: Podcast script generation failed: {error}")
 
 
 if __name__ == "__main__":

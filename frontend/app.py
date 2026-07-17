@@ -12,25 +12,26 @@ from typing import Any
 import streamlit as st
 
 
-from backend.cache_manager import (
-    build_cache_key,
-    cache_exists,
-    calculate_file_hash,
-    restore_cache,
-    save_cache,
-)
-from backend.diagnostics import (
+BACKEND_IMPORT_FOLDER = Path(__file__).resolve().parent.parent / "backend"
+
+if str(BACKEND_IMPORT_FOLDER) not in sys.path:
+    sys.path.insert(0, str(BACKEND_IMPORT_FOLDER))
+
+from diagnostics import (
     load_latest_report,
     record_python_exception,
     record_subprocess_result,
     utc_now,
     wait_before_retry,
 )
-from backend.job_manager import (
-    create_and_start_job,
-    is_finished,
-    read_job,
-    request_cancel,
+
+
+from cache_manager import (
+    build_cache_key,
+    cache_exists,
+    calculate_file_hash,
+    restore_cache,
+    save_cache,
 )
 
 
@@ -49,6 +50,7 @@ FLASHCARDS_PATH = DATA_FOLDER / "flashcards" / "flashcards.json"
 QUIZ_PATH = DATA_FOLDER / "quizzes" / "quiz.json"
 PODCAST_SCRIPT_PATH = DATA_FOLDER / "podcasts" / "podcast_script.txt"
 PODCAST_AUDIO_PATH = DATA_FOLDER / "podcasts" / "audio" / "podcast_episode.wav"
+PODCAST_SOURCE_HASH_PATH = DATA_FOLDER / "podcasts" / "source_hash.txt"
 
 TASKS = {
     "Document analysis": "document_analyzer.py",
@@ -58,7 +60,6 @@ TASKS = {
     "Quiz": "quiz_generator.py",
     "Podcast script": "podcast_generator.py",
     "Podcast audio": "podcast_audio.py",
-    "Quick Pack resources": "quick_pack_parallel.py",
 }
 
 TASK_ORDER = list(TASKS.keys())
@@ -149,10 +150,6 @@ def initialise_state() -> None:
         "current_file_hash": None,
         "current_cache_key": None,
         "cache_loaded": False,
-        "active_job_id": None,
-        "active_job_length": "Standard",
-        "active_job_selected_tasks": [],
-        "active_job_cache_saved": False,
     }
 
     for key, value in defaults.items():
@@ -316,20 +313,65 @@ def run_backend_script(
     return False, final_output or "The backend task failed."
 
 
-def clear_folder(folder: Path) -> None:
-    folder.mkdir(parents=True, exist_ok=True)
+def clear_folder(
+    folder: Path,
+    attempts: int = 4,
+) -> list[Path]:
+    """
+    Clear generated files without crashing the app when Windows or OneDrive
+    temporarily locks an item.
 
-    for item in folder.iterdir():
-        try:
-            if item.is_file() or item.is_symlink():
-                item.unlink()
-            elif item.is_dir():
-                shutil.rmtree(item)
-        except PermissionError:
-            continue
+    Returns any items that could not be removed. The caller may decide whether
+    those locked items are safe to ignore.
+    """
+
+    folder.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    locked_items: list[Path] = []
+
+    for item in list(folder.iterdir()):
+        removed = False
+
+        for attempt in range(1, attempts + 1):
+            try:
+                if item.is_file() or item.is_symlink():
+                    item.unlink(
+                        missing_ok=True
+                    )
+                elif item.is_dir():
+                    shutil.rmtree(item)
+
+                removed = True
+                break
+
+            except (
+                PermissionError,
+                OSError,
+            ):
+                if attempt < attempts:
+                    time.sleep(
+                        0.35 * attempt
+                    )
+
+        if not removed and item.exists():
+            locked_items.append(item)
+
+    return locked_items
 
 
 def clear_previous_project_data() -> None:
+    """
+    Clear document-specific outputs before analysing a new upload.
+
+    The podcasts folder is intentionally excluded because Windows, OneDrive,
+    the browser or an audio player may still have the previous WAV file open.
+    Stale podcast audio is hidden using the current-upload source hash and is
+    replaced only when the user explicitly generates a new podcast.
+    """
+
     folders = [
         IMAGE_FOLDER,
         DATA_FOLDER / "extracted_text",
@@ -337,11 +379,22 @@ def clear_previous_project_data() -> None:
         DATA_FOLDER / "summaries",
         DATA_FOLDER / "flashcards",
         DATA_FOLDER / "quizzes",
-        DATA_FOLDER / "podcasts",
     ]
 
+    locked_items: list[Path] = []
+
     for folder in folders:
-        clear_folder(folder)
+        locked_items.extend(
+            clear_folder(folder)
+        )
+
+    if locked_items:
+        st.warning(
+            "Some old generated files are temporarily locked by Windows or "
+            "OneDrive. PodcastAI will continue with the new upload, but those "
+            "locked files may remain on disk until the other program releases "
+            "them."
+        )
 
     st.session_state.material_ready = False
     st.session_state.generation_complete = False
@@ -349,9 +402,6 @@ def clear_previous_project_data() -> None:
     st.session_state.selected_mode = "study"
     st.session_state.current_cache_key = None
     st.session_state.cache_loaded = False
-    st.session_state.active_job_id = None
-    st.session_state.active_job_selected_tasks = []
-    st.session_state.active_job_cache_saved = False
 
 
 def save_uploaded_file(uploaded_file: Any) -> Path:
@@ -474,10 +524,90 @@ def prepare_tasks(selected_tasks: list[str]) -> list[str]:
     return [task for task in TASK_ORDER if task in requested]
 
 
+def current_upload_hash() -> str | None:
+    value = st.session_state.get(
+        "current_file_hash"
+    )
+
+    return str(value) if value else None
+
+
+def clear_podcast_artifacts() -> None:
+    """
+    Remove the previous script, audio and source marker before creating a new
+    podcast. This prevents a failed generation from exposing an older episode.
+    """
+
+    paths = [
+        PODCAST_SCRIPT_PATH,
+        PODCAST_AUDIO_PATH,
+        PODCAST_SOURCE_HASH_PATH,
+    ]
+
+    for path in paths:
+        if not path.exists():
+            continue
+
+        for attempt in range(1, 5):
+            try:
+                path.unlink(
+                    missing_ok=True
+                )
+                break
+            except (
+                PermissionError,
+                OSError,
+            ) as error:
+                if attempt >= 4:
+                    raise PermissionError(
+                        f"Could not replace the old podcast file: {path}. "
+                        "Close any open audio player or preview and retry."
+                    ) from error
+
+                time.sleep(
+                    0.4 * attempt
+                )
+
+
+def mark_podcast_for_current_upload() -> None:
+    file_hash = current_upload_hash()
+
+    if not file_hash:
+        return
+
+    PODCAST_SOURCE_HASH_PATH.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    PODCAST_SOURCE_HASH_PATH.write_text(
+        file_hash,
+        encoding="utf-8",
+    )
+
+
+def podcast_matches_current_upload() -> bool:
+    file_hash = current_upload_hash()
+
+    if (
+        not file_hash
+        or not PODCAST_SOURCE_HASH_PATH.exists()
+    ):
+        return False
+
+    saved_hash = PODCAST_SOURCE_HASH_PATH.read_text(
+        encoding="utf-8",
+        errors="replace",
+    ).strip()
+
+    return saved_hash == file_hash
+
+
 def generate_podcast_audio_task(
     mode: str,
     podcast_length: str,
 ) -> tuple[bool, str]:
+    clear_podcast_artifacts()
     outputs: list[str] = []
 
     if mode == "study":
@@ -512,6 +642,8 @@ def generate_podcast_audio_task(
     if not audio_success or not PODCAST_AUDIO_PATH.exists():
         return False, f"Podcast audio generation failed.\n\n{audio_output}"
 
+    mark_podcast_for_current_upload()
+
     return True, "\n\n".join(output for output in outputs if output)
 
 
@@ -541,63 +673,14 @@ def show_live_result(task_name: str, container: Any) -> None:
             cards = data.get("flashcards", [])
             st.success(f"Flashcards ready ({len(cards)} cards).")
 
-            for index, card in enumerate(cards[:5], start=1):
-                question = card.get(
-                    "question",
-                    "Question unavailable",
-                )
-                answer = card.get(
-                    "answer",
-                    "Answer unavailable",
-                )
-
-                with st.expander(
-                    f"Quick card {index}: {question}"
-                ):
-                    st.write(answer)
-
-            if len(cards) > 5:
-                st.caption(
-                    "Open the complete Flashcards tab for all cards."
-                )
-
         elif task_name == "Quiz":
             data = read_json_file(QUIZ_PATH) or {}
-            multiple_choice = data.get("multiple_choice", [])
-            true_false = data.get("true_false", [])
-            short_answer = data.get("short_answer", [])
             total = (
-                len(multiple_choice)
-                + len(true_false)
-                + len(short_answer)
+                len(data.get("multiple_choice", []))
+                + len(data.get("true_false", []))
+                + len(data.get("short_answer", []))
             )
             st.success(f"Quiz ready ({total} questions).")
-
-            preview_questions: list[str] = []
-
-            preview_questions.extend(
-                str(item.get("question", ""))
-                for item in multiple_choice[:3]
-            )
-            preview_questions.extend(
-                str(item.get("statement", ""))
-                for item in true_false[:2]
-            )
-            preview_questions.extend(
-                str(item.get("question", ""))
-                for item in short_answer[:2]
-            )
-
-            for index, question in enumerate(
-                [q for q in preview_questions if q][:5],
-                start=1,
-            ):
-                st.write(f"{index}. {question}")
-
-            if total:
-                st.caption(
-                    "Open the complete Quiz tab to answer and submit it."
-                )
 
         elif task_name == "Podcast script":
             script = read_text_file(PODCAST_SCRIPT_PATH)
@@ -652,6 +735,8 @@ def generate_tasks(
                     )
             else:
                 if task_name == "Podcast script":
+                    clear_podcast_artifacts()
+
                     success, output = run_backend_script(
                         TASKS[task_name],
                         extra_environment={
@@ -659,6 +744,14 @@ def generate_tasks(
                         },
                         stage_name="Podcast Script",
                     )
+
+                    if (
+                        success
+                        and read_text_file(
+                            PODCAST_SCRIPT_PATH
+                        )
+                    ):
+                        mark_podcast_for_current_upload()
                 else:
                     success, output = run_backend_script(
                         TASKS[task_name],
@@ -872,7 +965,14 @@ def display_audio() -> None:
     mode = current_mode()
     st.subheader("Story Audio" if mode == "story" else "Podcast")
 
-    if PODCAST_AUDIO_PATH.exists():
+    podcast_is_current = (
+        podcast_matches_current_upload()
+    )
+
+    if (
+        PODCAST_AUDIO_PATH.exists()
+        and podcast_is_current
+    ):
         audio = PODCAST_AUDIO_PATH.read_bytes()
         st.audio(audio, format="audio/wav")
         st.caption("This audio uses AI-generated voices.")
@@ -887,9 +987,16 @@ def display_audio() -> None:
             use_container_width=True,
         )
     else:
-        st.info("Audio has not been generated yet.")
+        st.info(
+            "Audio has not been generated for the current upload yet."
+        )
 
-    script = read_text_file(PODCAST_SCRIPT_PATH)
+    script = (
+        read_text_file(PODCAST_SCRIPT_PATH)
+        if podcast_is_current
+        else None
+    )
+
     if script:
         with st.expander("Read the audio script"):
             st.text(script)
@@ -1008,7 +1115,6 @@ def try_restore_cached_pack(
     st.session_state.current_cache_key = cache_key
     st.session_state.cache_loaded = True
     st.session_state.generation_complete = True
-    st.session_state.active_job_id = None
 
     st.success(
         "Previously generated results were found "
@@ -1061,406 +1167,6 @@ def save_current_pack_to_cache(
     )
 
     st.session_state.current_cache_key = cache_key
-
-
-
-
-def build_background_task_specs(
-    selected_tasks: list[str],
-    podcast_length: str,
-) -> list[dict[str, Any]]:
-    """
-    Expand user choices into a dependency-aware background pipeline.
-
-    A standard Quick Pack is generated by one parallel coordinator so
-    Summary, Flashcards and Quiz run at the same time. Document analysis
-    is not repeated because it already ran during Analyse Material.
-    """
-
-    mode = current_mode()
-    requested = set(selected_tasks)
-
-    quick_pack_core = {
-        "Document analysis",
-        "Summary",
-        "Flashcards",
-        "Quiz",
-    }
-
-    if requested == quick_pack_core:
-        return [
-            {
-                "name": "Quick Pack resources",
-                "script_name": "quick_pack_parallel.py",
-                "environment": {},
-                "max_attempts": 2,
-            }
-        ]
-
-    requested.discard("Document analysis")
-
-    ordered_names: list[str] = []
-
-    def add_task(task_name: str) -> None:
-        if task_name not in ordered_names:
-            ordered_names.append(task_name)
-
-    for task_name in TASK_ORDER:
-        if task_name in requested:
-            add_task(task_name)
-
-    if "Podcast audio" in requested:
-        if mode == "study":
-            dependencies = ["Study notes", "Podcast script"]
-        elif mode in {"work", "research", "general"}:
-            dependencies = ["Summary", "Podcast script"]
-        else:
-            dependencies = ["Podcast script"]
-
-        without_audio = [
-            name
-            for name in ordered_names
-            if name != "Podcast audio"
-        ]
-
-        ordered_names = []
-
-        for dependency in dependencies:
-            add_task(dependency)
-
-        for task_name in without_audio:
-            add_task(task_name)
-
-        add_task("Podcast audio")
-
-    task_specs: list[dict[str, Any]] = []
-
-    for task_name in ordered_names:
-        environment: dict[str, str] = {}
-
-        if task_name == "Podcast script":
-            environment["PODCASTAI_PODCAST_LENGTH"] = podcast_length
-
-        task_specs.append(
-            {
-                "name": task_name,
-                "script_name": TASKS[task_name],
-                "environment": environment,
-                "max_attempts": 2,
-            }
-        )
-
-    return task_specs
-
-
-def start_background_generation(
-    selected_tasks: list[str],
-    podcast_length: str,
-) -> str:
-    task_specs = build_background_task_specs(
-        selected_tasks,
-        podcast_length,
-    )
-
-    job_id = create_and_start_job(
-        title=(
-            f"PodcastAI {current_mode()} generation"
-        ),
-        tasks=task_specs,
-        metadata={
-            "document_mode": current_mode(),
-            "podcast_length": podcast_length,
-            "uploaded_name": st.session_state.get(
-                "uploaded_name"
-            ),
-            "file_hash": st.session_state.get(
-                "current_file_hash"
-            ),
-            "selected_tasks": selected_tasks,
-        },
-    )
-
-    st.session_state.active_job_id = job_id
-    st.session_state.active_job_length = podcast_length
-    st.session_state.active_job_selected_tasks = list(
-        selected_tasks
-    )
-    st.session_state.active_job_cache_saved = False
-    st.session_state.generation_complete = False
-
-    return job_id
-
-
-def task_status_icon(status: str) -> str:
-    return {
-        "queued": "○",
-        "running": "◌",
-        "retrying": "↻",
-        "completed": "✅",
-        "failed": "⚠️",
-        "cancelled": "⛔",
-    }.get(status, "•")
-
-
-def display_completed_background_resource(
-    task_name: str,
-) -> None:
-    """
-    Reveal a resource as soon as its task has completed.
-    """
-
-    container = st.container()
-    show_live_result(
-        task_name,
-        container,
-    )
-
-
-@st.fragment(run_every="1s")
-def display_background_job() -> None:
-    """
-    Poll only the progress panel once per second.
-
-    The rest of the page remains responsive while worker.py continues
-    independently in the background.
-    """
-
-    job_id = st.session_state.get(
-        "active_job_id"
-    )
-
-    if not job_id:
-        return
-
-    job = read_job(job_id)
-
-    if not job:
-        st.error(
-            "The background job could not be read."
-        )
-        return
-
-    status = str(
-        job.get("status", "unknown")
-    )
-
-    progress_value = max(
-        0,
-        min(
-            int(job.get("progress", 0)),
-            100,
-        ),
-    )
-
-    st.markdown("## Live generation")
-    st.progress(
-        progress_value,
-        text=(
-            f"{progress_value}% — "
-            f"{job.get('message', 'Working...')}"
-        ),
-    )
-
-    current_task = job.get(
-        "current_task_name"
-    )
-
-    if current_task:
-        st.info(
-            f"Current task: **{current_task}**"
-        )
-
-    metric_one, metric_two, metric_three = (
-        st.columns(3)
-    )
-
-    metric_one.metric(
-        "Completed",
-        int(job.get("completed_tasks", 0)),
-    )
-    metric_two.metric(
-        "Failed",
-        int(job.get("failed_tasks", 0)),
-    )
-    metric_three.metric(
-        "Total",
-        int(job.get("total_tasks", 0)),
-    )
-
-    with st.expander(
-        "Generation steps",
-        expanded=True,
-    ):
-        for task in job.get("tasks", []):
-            task_name = str(
-                task.get("name", "Task")
-            )
-            task_status = str(
-                task.get("status", "queued")
-            )
-            task_progress = int(
-                task.get("progress", 0)
-            )
-            task_message = str(
-                task.get("message", "")
-            )
-
-            st.write(
-                f"{task_status_icon(task_status)} "
-                f"**{task_name}** — "
-                f"{task_status.replace('_', ' ').title()}"
-            )
-
-            if task_status in {
-                "running",
-                "retrying",
-            }:
-                st.progress(
-                    max(
-                        0,
-                        min(task_progress, 100),
-                    ),
-                    text=task_message,
-                )
-            elif task_message:
-                st.caption(task_message)
-
-            if (
-                task_status == "failed"
-                and task.get("diagnostic_report")
-            ):
-                diagnostic = task[
-                    "diagnostic_report"
-                ]
-
-                with st.expander(
-                    f"{task_name} technical details"
-                ):
-                    st.write(
-                        "**Likely cause:** "
-                        f"{diagnostic.get('likely_cause')}"
-                    )
-                    st.write(
-                        "**Suggested fix:** "
-                        f"{diagnostic.get('suggested_fix')}"
-                    )
-
-    st.markdown("### Ready now")
-
-    completed_any = False
-    displayed_resources: set[str] = set()
-
-    for resource_name in job.get("ready_resources", []):
-        resource_name = str(resource_name)
-
-        if resource_name in {
-            "Summary",
-            "Study notes",
-            "Flashcards",
-            "Quiz",
-            "Podcast script",
-            "Podcast audio",
-        }:
-            completed_any = True
-            displayed_resources.add(resource_name)
-            display_completed_background_resource(
-                resource_name
-            )
-
-    for task in job.get("tasks", []):
-        task_name = str(task.get("name"))
-
-        if (
-            task.get("status") == "completed"
-            and task_name not in displayed_resources
-            and task_name != "Quick Pack resources"
-        ):
-            completed_any = True
-            displayed_resources.add(task_name)
-            display_completed_background_resource(
-                task_name
-            )
-
-    if not completed_any:
-        st.caption(
-            "Your first completed resource will "
-            "appear here automatically."
-        )
-
-    if status not in {
-        "completed",
-        "completed_with_errors",
-        "failed",
-        "cancelled",
-    }:
-        if st.button(
-            "Cancel generation",
-            key=f"cancel_{job_id}",
-        ):
-            request_cancel(job_id)
-            st.warning(
-                "Cancellation requested."
-            )
-
-        return
-
-    if status == "completed":
-        st.success(
-            "All requested content is ready."
-        )
-    elif status == "completed_with_errors":
-        st.warning(
-            "Generation finished, but one or "
-            "more tasks failed."
-        )
-    elif status == "cancelled":
-        st.warning(
-            "Generation was cancelled."
-        )
-    else:
-        st.error(
-            "Generation failed."
-        )
-
-    successful_tasks = [
-        str(resource_name)
-        for resource_name in job.get("ready_resources", [])
-    ]
-
-    successful_tasks.extend(
-        str(task.get("name"))
-        for task in job.get("tasks", [])
-        if (
-            task.get("status") == "completed"
-            and task.get("name") != "Quick Pack resources"
-        )
-    )
-
-    successful_tasks = list(dict.fromkeys(successful_tasks))
-
-    if (
-        successful_tasks
-        and not st.session_state.get(
-            "active_job_cache_saved",
-            False,
-        )
-    ):
-        save_current_pack_to_cache(
-            podcast_length=st.session_state.get(
-                "active_job_length",
-                "Standard",
-            ),
-            generated_tasks=successful_tasks,
-        )
-
-        st.session_state.active_job_cache_saved = True
-
-    st.session_state.generation_complete = bool(
-        successful_tasks
-    )
-
-    if successful_tasks:
-        display_results()
 
 
 
@@ -1687,28 +1393,10 @@ def display_home() -> None:
             ),
         )
 
-    active_job_id = st.session_state.get(
-        "active_job_id"
-    )
-
-    active_job = (
-        read_job(active_job_id)
-        if active_job_id
-        else None
-    )
-
-    job_running = bool(
-        active_job
-        and not is_finished(active_job)
-    )
-
     if st.button(
         "✨ Generate",
         type="primary",
-        disabled=(
-            not selected_tasks
-            or job_running
-        ),
+        disabled=not selected_tasks,
     ):
         apply_mode_override(mode)
 
@@ -1716,34 +1404,38 @@ def display_home() -> None:
             podcast_length
         )
 
-        if cache_loaded:
-            st.session_state.active_job_id = None
-        else:
-            job_id = start_background_generation(
+        if not cache_loaded:
+            results = generate_tasks(
                 selected_tasks,
                 podcast_length,
             )
 
-            st.success(
-                "Generation started in the background."
-            )
-            st.caption(
-                f"Job ID: {job_id}"
+            st.session_state.generation_complete = any(
+                success
+                for success, _ in results.values()
             )
 
-    if job_running:
-        st.caption(
-            "A generation job is already running."
-        )
+            successful_tasks = [
+                task_name
+                for task_name, (
+                    success,
+                    _,
+                ) in results.items()
+                if success
+            ]
 
-    display_background_job()
+            if successful_tasks:
+                save_current_pack_to_cache(
+                    podcast_length=podcast_length,
+                    generated_tasks=successful_tasks,
+                )
 
-    if (
-        st.session_state.generation_complete
-        and not st.session_state.get(
-            "active_job_id"
-        )
-    ):
+                st.success(
+                    "Results saved to the smart cache "
+                    "for faster future loading."
+                )
+
+    if st.session_state.generation_complete:
         display_results()
 
 

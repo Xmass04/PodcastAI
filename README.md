@@ -1,66 +1,53 @@
-# PodcastAI
+# PodcastAI V1 Beta Rollback Overlay
 
-PodcastAI is an AI-powered study platform designed to turn study materials into easier and more interactive learning resources.
+Cutoff used:
+- 15 July 2026, 9:51 PM UK time (BST)
+- Equivalent to 20:51 UTC
 
-## Main Goal
+Purpose:
+- Restore the last stable synchronous V1 Beta execution path.
+- Remove background-worker, package-refactor, parallel Quick Pack and Audio V2
+  experiments from the live execution path.
+- Preserve diagnostics, adaptive modes, Story Mode, podcast lengths and smart cache.
 
-The goal of PodcastAI is to help students study more efficiently by allowing them to upload learning materials and generate:
+Replace these live files:
+- frontend/app.py
+- backend/cache_manager.py
+- backend/diagnostics.py
+- backend/podcast_generator.py
+- backend/podcast_audio.py
 
-- Summaries
-- Podcasts
-- Quizzes
-- Flashcards
-- Audio notes
-- Revision resources
+Keep the rest of the existing project unchanged:
+- pdf_reader.py
+- image_reader.py
+- document_analyzer.py
+- ai_summarizer.py
+- study_notes.py
+- flashcard_generator.py
+- quiz_generator.py
+- .streamlit/config.toml
+- .env
+- requirements files
 
-## Planned Input Types
+Do not place files from v2_standby_do_not_import inside the live backend folder.
+They are retained only for later controlled testing.
 
-- PDF documents
-- Images and scanned pages
-- Typed text
-- Audio recordings
+Start V1 with:
+    streamlit run frontend/app.py
 
-## Planned Features
+Before testing:
+1. Stop Streamlit.
+2. End leftover python/pythonw worker processes from later V2 trials.
+3. Clear data/jobs if it exists.
+4. Close podcast audio and podcast_script.txt previews.
+5. Start Streamlit using the command above.
 
-- PDF text extraction
-- Image-to-text OCR
-- AI-generated summaries
-- Text-to-speech podcast generation
-- Quiz generation
-- Flashcard generation
-- Audio recording and playback
-- Saved study projects
-- User accounts
-- Forgot-password recovery
-- Translation and language options
-- Syllabus-based study support
-- Progress tracking
-
-## Current Development Status
-
-PodcastAI is currently in Phase 1 of development.
-
-The current focus is:
-
-1. Setting up the project
-2. Reading PDF files
-3. Extracting and saving text
-4. Building the first working prototype
-
-## Technology
-
-- Python
-- PyMuPDF
-- Git
-- GitHub
-- Visual Studio Code
-
-More technologies will be added as the project develops.
-
-## Developer
-
-Created by Jacob Mathew.
-
-## Project Vision
-
-One upload. Every way to learn.
+Recommended tests:
+1. Small PDF -> Analyse Material.
+2. Quick Task -> Summary.
+3. Quick Pack without audio.
+4. Story document -> Podcast script.
+5. Study document -> Quick podcast audio.
+6. Full Pack with audio.
+7. Upload the same file again to test cache.
+8. Enable Developer Mode and confirm diagnostics.

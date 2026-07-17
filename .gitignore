@@ -1,4 +1,4 @@
-# Virtual Environment
+## Virtual Environment
 .venv/
 
 # Python cache
@@ -7,7 +7,7 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Environment variables (API keys)
+# Environment variables
 .env
 
 # VS Code settings
@@ -19,9 +19,11 @@ Thumbs.db
 
 # Logs
 *.log
+logs/
 
 # Temporary files
 *.tmp
+temp/
 
 # Build folders
 build/
@@ -34,18 +36,16 @@ dist/
 .coverage
 htmlcov/
 
-# Local database (if we use SQLite)
+# Local database
 *.db
 *.sqlite3
 
-# User uploads (optional - we'll decide later)
+# User uploads
 uploads/
 
-# Generated podcasts (optional)
+# Generated podcasts
 generated_audio/
 
-# Generated temporary files
-temp/
 # User-uploaded documents and generated study content
 data/uploads/
 data/extracted_text/
@@ -54,11 +54,16 @@ data/podcasts/audio/
 data/quizzes/
 data/summaries/
 data/translations/
-data/*.pdf
 data/flashcards/
 data/images/
 data/analysis/
-logs/
-data/
-.env
 data/cache/
+data/checkpoints/
+data/*.pdf
+data/jobs/
+# Runtime jobs and generated diagnostics
+data/jobs/
+data/checkpoints/
+
+# Generated manifests, only if created automatically
+MANIFEST.TXT
